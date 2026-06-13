@@ -1,8 +1,10 @@
 import Link from "next/link";
+import NotifySubscribe from "@/components/NotifySubscribe";
 
 export default function Footer() {
   return (
     <footer className="border-t border-white/5 bg-charcoal">
+      <NotifySubscribe />
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-12 md:flex-row lg:px-10">
         <p className="font-display text-2xl tracking-logo">
           <span className="text-forest">DARTH</span>{" "}

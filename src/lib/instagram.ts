@@ -1,3 +1,5 @@
+import "server-only";
+
 import type { Photo, Species } from "@/data/photos";
 import { birdGroupFromCaption } from "@/lib/bird-groups";
 
@@ -74,8 +76,14 @@ async function fetchMediaPage(url: string): Promise<InstagramMediaResponse> {
   });
 
   if (!response.ok) {
-    const error = await response.text();
-    throw new Error(`Instagram Graph API error: ${error}`);
+    let message = `HTTP ${response.status}`;
+    try {
+      const body = await response.json();
+      message = body?.error?.message ?? message;
+    } catch {
+      // ignore parse errors
+    }
+    throw new Error(`Instagram Graph API error: ${message}`);
   }
 
   return response.json();

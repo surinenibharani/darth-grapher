@@ -1,3 +1,5 @@
+import "server-only";
+
 import { unstable_cache } from "next/cache";
 import type { Photo, Species } from "@/data/photos";
 import {
@@ -6,13 +8,38 @@ import {
   fallbackPhotos,
 } from "@/data/photos";
 import { fetchInstagramPhotos, isInstagramConfigured } from "@/lib/instagram";
+import { checkInstagramHealth } from "@/lib/instagram-health";
 import { selectBirdCloseUps } from "@/lib/photo-selection";
+
+/** Cache Instagram feed for 1 hour — one fetch shared across all pages. */
+const INSTAGRAM_CACHE_SECONDS = 3600;
 
 const getCachedInstagramPhotos = unstable_cache(
   async () => fetchInstagramPhotos(100),
   ["instagram-photos"],
-  { revalidate: 3600, tags: ["instagram"] }
+  { revalidate: INSTAGRAM_CACHE_SECONDS, tags: ["instagram"] }
 );
+
+const getCachedInstagramHealth = unstable_cache(
+  async () => checkInstagramHealth(),
+  ["instagram-health"],
+  { revalidate: 300, tags: ["instagram"] }
+);
+
+async function logInstagramFailure(error: unknown): Promise<void> {
+  const message = error instanceof Error ? error.message : String(error);
+  console.error("[Instagram] Feed fetch failed:", message);
+
+  try {
+    const health = await getCachedInstagramHealth();
+    if (!health.ok) {
+      console.error("[Instagram] Health check:", health.error);
+      if (health.hint) console.error("[Instagram] Fix:", health.hint);
+    }
+  } catch (healthError) {
+    console.error("[Instagram] Health check failed:", healthError);
+  }
+}
 
 export async function getPhotos(): Promise<Photo[]> {
   if (!isInstagramConfigured()) {
@@ -22,7 +49,7 @@ export async function getPhotos(): Promise<Photo[]> {
   try {
     return await getCachedInstagramPhotos();
   } catch (error) {
-    console.error("Failed to load Instagram photos:", error);
+    await logInstagramFailure(error);
     return fallbackPhotos;
   }
 }
@@ -82,21 +109,7 @@ export async function getAboutPortrait(): Promise<Photo> {
     photo.instagramUrl?.includes(ABOUT_PORTRAIT_SHORTCODE)
   );
 
-  if (fromFeed) return fromFeed;
-
-  if (isInstagramConfigured()) {
-    try {
-      const extended = await fetchInstagramPhotos(100);
-      const match = extended.find((photo) =>
-        photo.instagramUrl?.includes(ABOUT_PORTRAIT_SHORTCODE)
-      );
-      if (match) return match;
-    } catch {
-      // Fall through to local portrait
-    }
-  }
-
-  return aboutPortrait;
+  return fromFeed ?? aboutPortrait;
 }
 
 export async function isUsingInstagramFeed(): Promise<boolean> {
@@ -108,4 +121,36 @@ export async function isUsingInstagramFeed(): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/** Server-only diagnostic — run via `npm run check:instagram`. */
+export async function getInstagramFeedStatus(): Promise<{
+  configured: boolean;
+  feedOk: boolean;
+  health: Awaited<ReturnType<typeof checkInstagramHealth>>;
+}> {
+  const configured = isInstagramConfigured();
+  if (!configured) {
+    return {
+      configured: false,
+      feedOk: false,
+      health: {
+        ok: false,
+        error: "Instagram env vars not configured.",
+        hint: "Set INSTAGRAM_ACCESS_TOKEN and INSTAGRAM_USER_ID in .env.local (server-side only).",
+      },
+    };
+  }
+
+  const health = await checkInstagramHealth();
+  let feedOk = false;
+
+  try {
+    await getCachedInstagramPhotos();
+    feedOk = true;
+  } catch {
+    feedOk = false;
+  }
+
+  return { configured, feedOk, health };
 }
