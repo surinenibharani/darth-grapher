@@ -36,10 +36,10 @@ export default function ContactPage() {
                   Email
                 </p>
                 <a
-                  href="mailto:hello@darthgrapher.com"
+                  href="mailto:darthgrapher@gmail.com"
                   className="mt-2 block font-display text-xl text-ivory transition-colors hover:text-gold"
                 >
-                  hello@darthgrapher.com
+                  darthgrapher@gmail.com
                 </a>
               </div>
               <div>
@@ -47,7 +47,7 @@ export default function ContactPage() {
                   Location
                 </p>
                 <p className="mt-2 font-display text-xl text-ivory">
-                  Pacific Northwest
+                  Pennsylvania, USA
                 </p>
               </div>
               <div>
@@ -55,8 +55,8 @@ export default function ContactPage() {
                   Availability
                 </p>
                 <p className="mt-2 font-sans text-sm text-mist">
-                  Open for commissions, editorial work, and conservation
-                  partnerships.
+                  Passionate hobbyist wildlife photographer open for conservation
+                  partnerships and collaborations.
                 </p>
               </div>
             </FadeIn>
