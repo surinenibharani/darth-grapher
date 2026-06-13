@@ -15,6 +15,7 @@ const config: Config = {
         mist: "#8a8a8a",
         ivory: "#e8e4df",
         gold: "#c9a962",
+        forest: "#7d9b8a",
       },
       fontFamily: {
         display: ["var(--font-cormorant)", "Georgia", "serif"],
@@ -22,6 +23,7 @@ const config: Config = {
       },
       letterSpacing: {
         widest: "0.25em",
+        logo: "0.21em",
       },
     },
   },

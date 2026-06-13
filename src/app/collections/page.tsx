@@ -4,6 +4,7 @@ import { speciesLabels, type Photo, type Species } from "@/data/photos";
 import { groupBirdPhotos } from "@/lib/bird-groups";
 import { getPhotosBySpecies } from "@/lib/photos";
 import FadeIn from "@/components/FadeIn";
+import VideoPlayButton, { isVideoPost } from "@/components/VideoPlayButton";
 
 const speciesOrder: Species[] = ["birds", "mammals", "marine", "reptiles"];
 
@@ -29,15 +30,7 @@ function PhotoGrid({ photos }: { photos: Photo[] }) {
             sizes="(max-width: 768px) 50vw, 25vw"
             className="object-cover transition-transform duration-700 group-hover:scale-105"
           />
-          {photo.videoUrl && (
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-void/60">
-                <svg viewBox="0 0 24 24" fill="currentColor" className="ml-0.5 h-3.5 w-3.5 text-ivory" aria-hidden>
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </div>
-            </div>
-          )}
+          {isVideoPost(photo) && <VideoPlayButton size="sm" />}
           <div className="absolute inset-0 flex items-end bg-gradient-to-t from-void/80 to-transparent p-3 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
             <p className="font-sans text-[10px] uppercase tracking-widest text-ivory">
               {photo.title}

@@ -22,9 +22,10 @@ export default function Navbar() {
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6 lg:px-10">
         <Link
           href="/"
-          className="font-display text-xl tracking-widest text-ivory transition-colors hover:text-gold"
+          className="font-display text-2xl tracking-logo transition-opacity hover:opacity-90"
         >
-          DARTH GRAPHER
+          <span className="text-forest">DARTH</span>{" "}
+          <span className="text-gold">GRAPHER</span>
         </Link>
 
         <ul className="hidden items-center gap-10 md:flex">

@@ -4,8 +4,9 @@ export default function Footer() {
   return (
     <footer className="border-t border-white/5 bg-charcoal">
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-12 md:flex-row lg:px-10">
-        <p className="font-display text-lg tracking-widest text-ivory">
-          DARTH GRAPHER
+        <p className="font-display text-2xl tracking-logo">
+          <span className="text-forest">DARTH</span>{" "}
+          <span className="text-gold">GRAPHER</span>
         </p>
         <p className="font-sans text-xs uppercase tracking-widest text-mist">
           Wildlife Photography

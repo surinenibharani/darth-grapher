@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Photo } from "@/data/photos";
 import FadeIn from "@/components/FadeIn";
+import VideoPlayButton, { isVideoPost } from "@/components/VideoPlayButton";
 
 function heroObjectPosition(width: number, height: number): string {
   const ratio = width / height;
@@ -171,6 +172,7 @@ export default function HomePageClient({
                     sizes="(max-width: 768px) 100vw, 33vw"
                     className="object-cover transition-transform duration-700 group-hover:scale-105"
                   />
+                  {isVideoPost(photo) && <VideoPlayButton size="md" />}
                   <div className="absolute inset-0 bg-gradient-to-t from-void/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                   <div className="absolute inset-x-0 bottom-0 p-6">
                     <p className="font-display text-xl text-ivory opacity-0 transition-opacity duration-500 group-hover:opacity-100">
