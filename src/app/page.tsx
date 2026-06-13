@@ -1,15 +1,21 @@
 import HomePageClient from "@/components/HomePageClient";
-import { getFeaturedPhotos, isUsingInstagramFeed } from "@/lib/photos";
+import {
+  getFeaturedPhotos,
+  getHeroPhoto,
+  isUsingInstagramFeed,
+} from "@/lib/photos";
 
 export default async function HomePage() {
-  const [featuredPhotos, usingInstagram] = await Promise.all([
+  const [featuredPhotos, heroPhoto, usingInstagram] = await Promise.all([
     getFeaturedPhotos(),
+    getHeroPhoto(),
     isUsingInstagramFeed(),
   ]);
 
   return (
     <HomePageClient
       featuredPhotos={featuredPhotos}
+      heroPhoto={heroPhoto}
       usingInstagram={usingInstagram}
     />
   );

@@ -8,14 +8,16 @@ import FadeIn from "@/components/FadeIn";
 
 interface HomePageClientProps {
   featuredPhotos: Photo[];
+  heroPhoto: Photo | null;
   usingInstagram: boolean;
 }
 
 export default function HomePageClient({
   featuredPhotos,
+  heroPhoto,
   usingInstagram,
 }: HomePageClientProps) {
-  if (featuredPhotos.length === 0) {
+  if (!heroPhoto && featuredPhotos.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center px-6 pt-32">
         <p className="max-w-lg text-center font-sans text-sm text-mist">
@@ -26,7 +28,8 @@ export default function HomePageClient({
     );
   }
 
-  const hero = featuredPhotos[0];
+  const hero = heroPhoto ?? featuredPhotos[0];
+  const gridPhotos = featuredPhotos.filter((photo) => photo.id !== hero.id);
 
   return (
     <>
@@ -129,7 +132,7 @@ export default function HomePageClient({
           </FadeIn>
 
           <div className="mt-16 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {featuredPhotos.slice(1).map((photo, i) => (
+            {gridPhotos.map((photo, i) => (
               <FadeIn key={photo.id} delay={i * 0.1}>
                 <Link
                   href="/portfolio"

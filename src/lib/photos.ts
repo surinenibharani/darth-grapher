@@ -28,6 +28,22 @@ export async function getFeaturedPhotos(): Promise<Photo[]> {
   return featured.length > 0 ? featured : photos.slice(0, 5);
 }
 
+/** Hero: always a bird still image — never a video thumbnail. */
+export async function getHeroPhoto(): Promise<Photo | null> {
+  const photos = await getPhotos();
+  const birdImage = photos.find(
+    (photo) => photo.species === "birds" && photo.mediaType !== "VIDEO"
+  );
+
+  return (
+    birdImage ??
+    photos.find((photo) => photo.species === "birds") ??
+    photos.find((photo) => photo.mediaType !== "VIDEO") ??
+    photos[0] ??
+    null
+  );
+}
+
 export async function getPhotosBySpecies(species: Species): Promise<Photo[]> {
   const photos = await getPhotos();
   return photos.filter((photo) => photo.species === species);

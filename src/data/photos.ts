@@ -13,6 +13,7 @@ export interface Photo {
   species: Species;
   /** Bird species name derived from Instagram hashtags (birds only). */
   birdGroup?: string;
+  mediaType?: "IMAGE" | "VIDEO";
   instagramUrl?: string;
   featured?: boolean;
 }

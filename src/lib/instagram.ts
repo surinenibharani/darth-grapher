@@ -90,6 +90,7 @@ function flattenMedia(nodes: InstagramMediaNode[]): Array<{
   caption: string;
   permalink: string;
   timestamp: string;
+  mediaType: "IMAGE" | "VIDEO";
 }> {
   const flattened: Array<{
     id: string;
@@ -97,6 +98,7 @@ function flattenMedia(nodes: InstagramMediaNode[]): Array<{
     caption: string;
     permalink: string;
     timestamp: string;
+    mediaType: "IMAGE" | "VIDEO";
   }> = [];
 
   for (const node of nodes) {
@@ -114,6 +116,7 @@ function flattenMedia(nodes: InstagramMediaNode[]): Array<{
           caption,
           permalink: child.permalink ?? permalink,
           timestamp,
+          mediaType: child.media_type === "VIDEO" ? "VIDEO" : "IMAGE",
         });
       });
       continue;
@@ -128,6 +131,7 @@ function flattenMedia(nodes: InstagramMediaNode[]): Array<{
       caption,
       permalink,
       timestamp,
+      mediaType: node.media_type === "VIDEO" ? "VIDEO" : "IMAGE",
     });
   }
 
@@ -169,6 +173,7 @@ export async function fetchInstagramPhotos(limit = 50): Promise<Photo[]> {
         species === "birds" && caption
           ? birdGroupFromCaption(caption) ?? undefined
           : undefined,
+      mediaType: item.mediaType,
       instagramUrl: item.permalink,
       featured: index < 5,
     };
