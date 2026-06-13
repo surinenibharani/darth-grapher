@@ -10,6 +10,39 @@ interface LightboxProps {
   onClose: () => void;
 }
 
+function CaptionPanel({ photo }: { photo: Photo }) {
+  return (
+    <aside className="flex min-h-0 flex-col justify-center gap-4 lg:max-h-[85vh] lg:w-80 lg:shrink-0 lg:overflow-y-auto lg:pr-2">
+      {photo.birdGroup && (
+        <p className="font-sans text-xs uppercase tracking-[0.3em] text-gold">
+          {photo.birdGroup}
+        </p>
+      )}
+      <h3 className="font-display text-2xl font-light leading-snug text-ivory md:text-3xl">
+        {photo.title}
+      </h3>
+      <p className="font-sans text-xs uppercase tracking-widest text-mist">
+        {photo.location}
+      </p>
+      {photo.notes && (
+        <p className="font-sans text-sm leading-relaxed text-mist">
+          {photo.notes}
+        </p>
+      )}
+      {photo.instagramUrl && (
+        <a
+          href={photo.instagramUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-2 inline-block font-sans text-xs uppercase tracking-widest text-gold transition-colors hover:text-ivory"
+        >
+          View on Instagram
+        </a>
+      )}
+    </aside>
+  );
+}
+
 export default function Lightbox({ photo, onClose }: LightboxProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -74,7 +107,7 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-void/95 p-4 backdrop-blur-sm"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-void/95 p-4 backdrop-blur-sm md:p-8"
           onClick={onClose}
         >
           <button
@@ -82,7 +115,7 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
             type="button"
             aria-label="Close"
             onClick={onClose}
-            className="absolute right-6 top-6 font-sans text-xs uppercase tracking-widest text-mist transition-colors hover:text-ivory"
+            className="absolute right-6 top-6 z-10 font-sans text-xs uppercase tracking-widest text-mist transition-colors hover:text-ivory"
           >
             Close
           </button>
@@ -92,10 +125,10 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="relative max-h-[85vh] w-full max-w-6xl"
+            className="flex max-h-[90vh] w-full max-w-7xl flex-col gap-6 overflow-y-auto lg:max-h-[85vh] lg:flex-row lg:items-center lg:gap-10 lg:overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative aspect-[16/10] w-full overflow-hidden bg-charcoal">
+            <div className="relative flex min-h-[40vh] w-full flex-1 items-center justify-center bg-charcoal lg:min-h-0 lg:max-h-[85vh] lg:self-stretch">
               {photo.videoUrl ? (
                 <video
                   src={photo.videoUrl}
@@ -103,42 +136,23 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
                   controls
                   playsInline
                   autoPlay
-                  className="h-full w-full object-contain"
+                  className="max-h-[50vh] w-full object-contain lg:max-h-[85vh]"
                 />
               ) : (
-                <Image
-                  src={photo.src}
-                  alt={photo.title}
-                  fill
-                  sizes="100vw"
-                  className="object-contain"
-                  priority
-                />
+                <div className="relative h-[50vh] w-full lg:h-full lg:min-h-[50vh] lg:max-h-[85vh]">
+                  <Image
+                    src={photo.src}
+                    alt={photo.title}
+                    fill
+                    sizes="(max-width: 1024px) 100vw, 65vw"
+                    className="object-contain"
+                    priority
+                  />
+                </div>
               )}
             </div>
-            <div className="mt-6 text-center">
-              <h3 className="font-display text-2xl text-ivory md:text-3xl">
-                {photo.title}
-              </h3>
-              <p className="mt-2 font-sans text-xs uppercase tracking-widest text-mist">
-                {photo.location}
-              </p>
-              {photo.notes && (
-                <p className="mx-auto mt-4 max-w-2xl font-sans text-sm leading-relaxed text-mist">
-                  {photo.notes}
-                </p>
-              )}
-              {photo.instagramUrl && (
-                <a
-                  href={photo.instagramUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-4 inline-block font-sans text-xs uppercase tracking-widest text-gold transition-colors hover:text-ivory"
-                >
-                  View on Instagram
-                </a>
-              )}
-            </div>
+
+            <CaptionPanel photo={photo} />
           </motion.div>
         </motion.div>
       )}
