@@ -38,15 +38,26 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
             className="relative max-h-[85vh] w-full max-w-6xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="relative aspect-[16/10] w-full overflow-hidden">
-              <Image
-                src={photo.src}
-                alt={photo.title}
-                fill
-                sizes="100vw"
-                className="object-contain"
-                priority
-              />
+            <div className="relative aspect-[16/10] w-full overflow-hidden bg-charcoal">
+              {photo.videoUrl ? (
+                <video
+                  src={photo.videoUrl}
+                  poster={photo.src}
+                  controls
+                  playsInline
+                  autoPlay
+                  className="h-full w-full object-contain"
+                />
+              ) : (
+                <Image
+                  src={photo.src}
+                  alt={photo.title}
+                  fill
+                  sizes="100vw"
+                  className="object-contain"
+                  priority
+                />
+              )}
             </div>
             <div className="mt-6 text-center">
               <h3 className="font-display text-2xl text-ivory md:text-3xl">

@@ -52,9 +52,19 @@ function speciesFromCaption(caption: string): Species {
   return "birds";
 }
 
-function imageUrl(node: InstagramMediaNode): string | null {
-  if (node.media_type === "IMAGE" && node.media_url) return node.media_url;
-  if (node.media_type === "VIDEO" && node.thumbnail_url) return node.thumbnail_url;
+function mediaEntry(
+  node: InstagramMediaNode
+): { src: string; mediaType: "IMAGE" | "VIDEO"; videoUrl?: string } | null {
+  if (node.media_type === "IMAGE" && node.media_url) {
+    return { src: node.media_url, mediaType: "IMAGE" };
+  }
+  if (node.media_type === "VIDEO" && node.thumbnail_url && node.media_url) {
+    return {
+      src: node.thumbnail_url,
+      mediaType: "VIDEO",
+      videoUrl: node.media_url,
+    };
+  }
   return null;
 }
 
@@ -91,6 +101,7 @@ function flattenMedia(nodes: InstagramMediaNode[]): Array<{
   permalink: string;
   timestamp: string;
   mediaType: "IMAGE" | "VIDEO";
+  videoUrl?: string;
 }> {
   const flattened: Array<{
     id: string;
@@ -99,6 +110,7 @@ function flattenMedia(nodes: InstagramMediaNode[]): Array<{
     permalink: string;
     timestamp: string;
     mediaType: "IMAGE" | "VIDEO";
+    videoUrl?: string;
   }> = [];
 
   for (const node of nodes) {
@@ -108,30 +120,32 @@ function flattenMedia(nodes: InstagramMediaNode[]): Array<{
 
     if (node.media_type === "CAROUSEL_ALBUM" && node.children?.data?.length) {
       node.children.data.forEach((child, index) => {
-        const src = imageUrl(child);
-        if (!src) return;
+        const entry = mediaEntry(child);
+        if (!entry) return;
         flattened.push({
           id: `${node.id}-${index}`,
-          src,
+          src: entry.src,
           caption,
           permalink: child.permalink ?? permalink,
           timestamp,
-          mediaType: child.media_type === "VIDEO" ? "VIDEO" : "IMAGE",
+          mediaType: entry.mediaType,
+          videoUrl: entry.videoUrl,
         });
       });
       continue;
     }
 
-    const src = imageUrl(node);
-    if (!src) continue;
+    const entry = mediaEntry(node);
+    if (!entry) continue;
 
     flattened.push({
       id: node.id,
-      src,
+      src: entry.src,
       caption,
       permalink,
       timestamp,
-      mediaType: node.media_type === "VIDEO" ? "VIDEO" : "IMAGE",
+      mediaType: entry.mediaType,
+      videoUrl: entry.videoUrl,
     });
   }
 
@@ -174,6 +188,7 @@ export async function fetchInstagramPhotos(limit = 50): Promise<Photo[]> {
           ? birdGroupFromCaption(caption) ?? undefined
           : undefined,
       mediaType: item.mediaType,
+      videoUrl: item.videoUrl,
       instagramUrl: item.permalink,
       featured: index < 5,
     };

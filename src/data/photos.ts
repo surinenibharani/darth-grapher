@@ -14,6 +14,8 @@ export interface Photo {
   /** Bird species name derived from Instagram hashtags (birds only). */
   birdGroup?: string;
   mediaType?: "IMAGE" | "VIDEO";
+  /** MP4 URL for Instagram video posts. */
+  videoUrl?: string;
   instagramUrl?: string;
   featured?: boolean;
 }
