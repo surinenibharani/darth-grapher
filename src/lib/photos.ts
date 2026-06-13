@@ -26,6 +26,21 @@ const getCachedInstagramHealth = unstable_cache(
   { revalidate: 300, tags: ["instagram"] }
 );
 
+function sortPhotosByNewest(photos: Photo[]): Photo[] {
+  return [...photos].sort((a, b) => {
+    const aTime = a.publishedAt ? Date.parse(a.publishedAt) : 0;
+    const bTime = b.publishedAt ? Date.parse(b.publishedAt) : 0;
+    return bTime - aTime;
+  });
+}
+
+/** Picks a stable hero for the current UTC day (ISR-friendly, crawler-consistent). */
+function pickDailyHero(items: Photo[]): Photo | null {
+  if (items.length === 0) return null;
+  const dayIndex = Math.floor(Date.now() / 86_400_000);
+  return items[dayIndex % items.length];
+}
+
 async function logInstagramFailure(error: unknown): Promise<void> {
   const message = error instanceof Error ? error.message : String(error);
   console.error("[Instagram] Feed fetch failed:", message);
@@ -47,7 +62,7 @@ export async function getPhotos(): Promise<Photo[]> {
   }
 
   try {
-    return await getCachedInstagramPhotos();
+    return sortPhotosByNewest(await getCachedInstagramPhotos());
   } catch (error) {
     await logInstagramFailure(error);
     return fallbackPhotos;
@@ -76,25 +91,30 @@ export async function getVideoPosts(): Promise<Photo[]> {
   );
 }
 
-/** Hero: random bird still image on each page load — never a video thumbnail. */
+/** Hero: daily-rotating bird still — stable within each UTC day for SEO/caching. */
 export async function getHeroPhoto(): Promise<Photo | null> {
   const photos = await getPhotos();
   const birdPortraits = photos.filter(
     (photo) => photo.species === "birds" && photo.mediaType !== "VIDEO"
   );
 
-  const pickRandom = (items: Photo[]) =>
-    items.length > 0
-      ? items[Math.floor(Math.random() * items.length)]
-      : null;
-
   return (
-    pickRandom(birdPortraits) ??
-    pickRandom(photos.filter((photo) => photo.species === "birds")) ??
-    pickRandom(photos.filter((photo) => photo.mediaType !== "VIDEO")) ??
+    pickDailyHero(birdPortraits) ??
+    pickDailyHero(photos.filter((photo) => photo.species === "birds")) ??
+    pickDailyHero(photos.filter((photo) => photo.mediaType !== "VIDEO")) ??
     photos[0] ??
     null
   );
+}
+
+/** User-visible notice when Instagram is configured but the feed is unavailable. */
+export async function getInstagramFeedWarning(): Promise<string | null> {
+  if (!isInstagramConfigured()) return null;
+
+  const feedOk = await isUsingInstagramFeed();
+  if (feedOk) return null;
+
+  return "Instagram feed is temporarily unavailable — showing saved photos until the connection is restored.";
 }
 
 export async function getPhotosBySpecies(species: Species): Promise<Photo[]> {

@@ -5,7 +5,7 @@ import {
   isUsingInstagramFeed,
 } from "@/lib/photos";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 3600;
 
 export default async function HomePage() {
   const heroPhoto = await getHeroPhoto();

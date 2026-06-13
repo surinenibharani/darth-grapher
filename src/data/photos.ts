@@ -17,6 +17,8 @@ export interface Photo {
   /** MP4 URL for Instagram video posts. */
   videoUrl?: string;
   instagramUrl?: string;
+  /** ISO 8601 publish time from Instagram. */
+  publishedAt?: string;
   featured?: boolean;
 }
 

@@ -38,7 +38,7 @@ export default function NotifySubscribe() {
       if (lastSeen !== post.id && showNotification && Notification.permission === "granted") {
         new Notification("New post from Darth Grapher", {
           body: post.title,
-          icon: post.thumbnail || "/favicon.ico",
+          icon: post.thumbnail || "/images/about-tree-swallow.jpg",
           tag: "darthgrapher-new-post",
           data: { url: post.permalink || "/portfolio" },
         });

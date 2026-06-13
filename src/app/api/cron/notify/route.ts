@@ -37,6 +37,7 @@ export async function GET(req: Request) {
 
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL,
+      to: process.env.RESEND_FROM_EMAIL,
       bcc: store.emails,
       subject: `New post from Darth Grapher: ${latest.title}`,
       html: `
@@ -45,6 +46,7 @@ export async function GET(req: Request) {
         <p><a href="${latest.permalink || `${siteUrl}/portfolio`}">View the post</a></p>
         <p><a href="${siteUrl}">Visit the website</a></p>
       `,
+      text: `New post from Darth Grapher: ${latest.title}. View: ${latest.permalink || `${siteUrl}/portfolio`}`,
     });
   }
 

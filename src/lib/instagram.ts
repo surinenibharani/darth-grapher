@@ -198,6 +198,7 @@ export async function fetchInstagramPhotos(limit = 50): Promise<Photo[]> {
       mediaType: item.mediaType,
       videoUrl: item.videoUrl,
       instagramUrl: item.permalink,
+      publishedAt: item.timestamp || undefined,
       featured: index < 5,
     };
   });

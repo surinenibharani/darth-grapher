@@ -11,6 +11,13 @@ function escapeXml(text: string): string {
     .replace(/'/g, "&apos;");
 }
 
+function formatRssDate(iso: string): string | null {
+  if (!iso) return null;
+  const parsed = Date.parse(iso);
+  if (Number.isNaN(parsed)) return null;
+  return new Date(parsed).toUTCString();
+}
+
 export async function GET() {
   const posts = await getRecentPostsForFeed(20);
   const siteUrl =
@@ -19,11 +26,13 @@ export async function GET() {
   const items = posts
     .map((post) => {
       const link = post.permalink || `${siteUrl}/portfolio`;
+      const pubDate = formatRssDate(post.timestamp);
       return `    <item>
       <title>${escapeXml(post.title)}</title>
       <link>${escapeXml(link)}</link>
       <guid isPermaLink="true">${escapeXml(link)}</guid>
-      <description>${escapeXml(post.title)}</description>
+      <description>${escapeXml(post.description)}</description>
+      ${pubDate ? `<pubDate>${escapeXml(pubDate)}</pubDate>` : ""}
       ${post.thumbnail ? `<enclosure url="${escapeXml(post.thumbnail)}" type="image/jpeg" />` : ""}
     </item>`;
     })
