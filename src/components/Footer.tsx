@@ -19,6 +19,12 @@ export default function Footer() {
             Portfolio
           </Link>
           <Link
+            href="/videos"
+            className="font-sans text-xs uppercase tracking-widest text-mist transition-colors hover:text-gold"
+          >
+            Videos
+          </Link>
+          <Link
             href="/contact"
             className="font-sans text-xs uppercase tracking-widest text-mist transition-colors hover:text-gold"
           >

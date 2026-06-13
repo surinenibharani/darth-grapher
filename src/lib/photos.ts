@@ -6,9 +6,10 @@ import {
   fallbackPhotos,
 } from "@/data/photos";
 import { fetchInstagramPhotos, isInstagramConfigured } from "@/lib/instagram";
+import { selectBirdCloseUps } from "@/lib/photo-selection";
 
 const getCachedInstagramPhotos = unstable_cache(
-  async () => fetchInstagramPhotos(),
+  async () => fetchInstagramPhotos(100),
   ["instagram-photos"],
   { revalidate: 3600, tags: ["instagram"] }
 );
@@ -30,6 +31,22 @@ export async function getFeaturedPhotos(): Promise<Photo[]> {
   const photos = await getPhotos();
   const featured = photos.filter((photo) => photo.featured);
   return featured.length > 0 ? featured : photos.slice(0, 5);
+}
+
+/** Nine close-up bird stills for the home page Selected Moments grid. */
+export async function getSelectedMoments(
+  excludeId?: string
+): Promise<Photo[]> {
+  const photos = await getPhotos();
+  return selectBirdCloseUps(photos, 9, excludeId ? [excludeId] : []);
+}
+
+/** Instagram video posts only. */
+export async function getVideoPosts(): Promise<Photo[]> {
+  const photos = await getPhotos();
+  return photos.filter(
+    (photo) => photo.mediaType === "VIDEO" || Boolean(photo.videoUrl)
+  );
 }
 
 /** Hero: random bird still image on each page load — never a video thumbnail. */

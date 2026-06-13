@@ -6,7 +6,6 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Photo } from "@/data/photos";
 import FadeIn from "@/components/FadeIn";
-import VideoPlayButton, { isVideoPost } from "@/components/VideoPlayButton";
 
 function heroObjectPosition(width: number, height: number): string {
   const ratio = width / height;
@@ -24,19 +23,19 @@ function heroObjectPosition(width: number, height: number): string {
 }
 
 interface HomePageClientProps {
-  featuredPhotos: Photo[];
+  selectedMoments: Photo[];
   heroPhoto: Photo | null;
   usingInstagram: boolean;
 }
 
 export default function HomePageClient({
-  featuredPhotos,
+  selectedMoments,
   heroPhoto,
   usingInstagram,
 }: HomePageClientProps) {
   const [heroPosition, setHeroPosition] = useState("center 30%");
 
-  if (!heroPhoto && featuredPhotos.length === 0) {
+  if (!heroPhoto && selectedMoments.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center px-6 pt-32">
         <p className="max-w-lg text-center font-sans text-sm text-mist">
@@ -47,8 +46,10 @@ export default function HomePageClient({
     );
   }
 
-  const hero = heroPhoto ?? featuredPhotos[0];
-  const gridPhotos = featuredPhotos.filter((photo) => photo.id !== hero.id);
+  const hero = heroPhoto ?? selectedMoments[0];
+  const moments = selectedMoments
+    .filter((photo) => photo.id !== hero?.id)
+    .slice(0, 9);
 
   return (
     <>
@@ -156,10 +157,14 @@ export default function HomePageClient({
             <h2 className="mt-4 font-display text-4xl font-light text-ivory md:text-5xl">
               Selected Moments
             </h2>
+            <p className="mt-4 max-w-lg font-sans text-sm leading-relaxed text-mist">
+              Nine close-up portraits of Pennsylvania birds — intimate frames
+              drawn from the wild.
+            </p>
           </FadeIn>
 
           <div className="mt-16 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {gridPhotos.map((photo, i) => (
+            {moments.map((photo, i) => (
               <FadeIn key={photo.id} delay={i * 0.1}>
                 <Link
                   href="/portfolio"
@@ -170,14 +175,18 @@ export default function HomePageClient({
                     alt={photo.title}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover transition-transform duration-700 group-hover:scale-105"
+                    className="object-cover object-[center_35%] transition-transform duration-700 group-hover:scale-105"
                   />
-                  {isVideoPost(photo) && <VideoPlayButton size="md" />}
                   <div className="absolute inset-0 bg-gradient-to-t from-void/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                   <div className="absolute inset-x-0 bottom-0 p-6">
                     <p className="font-display text-xl text-ivory opacity-0 transition-opacity duration-500 group-hover:opacity-100">
                       {photo.title}
                     </p>
+                    {photo.birdGroup && (
+                      <p className="mt-1 font-sans text-[10px] uppercase tracking-widest text-gold opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+                        {photo.birdGroup}
+                      </p>
+                    )}
                   </div>
                 </Link>
               </FadeIn>

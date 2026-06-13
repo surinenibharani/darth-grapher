@@ -1,22 +1,22 @@
 import HomePageClient from "@/components/HomePageClient";
 import {
-  getFeaturedPhotos,
   getHeroPhoto,
+  getSelectedMoments,
   isUsingInstagramFeed,
 } from "@/lib/photos";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [featuredPhotos, heroPhoto, usingInstagram] = await Promise.all([
-    getFeaturedPhotos(),
-    getHeroPhoto(),
+  const heroPhoto = await getHeroPhoto();
+  const [selectedMoments, usingInstagram] = await Promise.all([
+    getSelectedMoments(heroPhoto?.id),
     isUsingInstagramFeed(),
   ]);
 
   return (
     <HomePageClient
-      featuredPhotos={featuredPhotos}
+      selectedMoments={selectedMoments}
       heroPhoto={heroPhoto}
       usingInstagram={usingInstagram}
     />
