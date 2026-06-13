@@ -53,7 +53,9 @@ export default function HomePageClient({
             fill
             priority
             sizes="100vw"
-            className="object-contain"
+            className="pointer-events-none object-contain select-none"
+            draggable={false}
+            onContextMenu={(e) => e.preventDefault()}
           />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-void via-void/40 to-void/20" />
@@ -155,7 +157,9 @@ export default function HomePageClient({
                     alt={photo.title}
                     fill
                     sizes="(max-width: 768px) 100vw, 33vw"
-                    className="object-cover object-[center_35%] transition-transform duration-700 group-hover:scale-105"
+                    className="pointer-events-none object-cover object-[center_35%] select-none transition-transform duration-700 group-hover:scale-105"
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-void/70 to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                   <div className="absolute inset-x-0 bottom-0 p-6">

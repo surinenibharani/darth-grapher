@@ -30,7 +30,9 @@ export default function CollectionsPhotoGrid({
               alt={photo.title}
               fill
               sizes="(max-width: 768px) 50vw, 25vw"
-              className="object-cover transition-transform duration-700 group-hover:scale-105"
+              className="pointer-events-none object-cover select-none transition-transform duration-700 group-hover:scale-105"
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
             />
             {isVideoPost(photo) && <VideoPlayButton size="sm" />}
             <div className="absolute inset-0 flex items-end bg-gradient-to-t from-void/80 to-transparent p-3 opacity-0 transition-opacity duration-500 group-hover:opacity-100">

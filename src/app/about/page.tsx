@@ -24,7 +24,8 @@ export default async function AboutPage() {
                 alt={portrait.title}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
-                className="object-cover"
+                className="pointer-events-none object-cover select-none"
+                draggable={false}
               />
             </div>
           </FadeIn>

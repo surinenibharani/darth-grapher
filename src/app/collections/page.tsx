@@ -39,7 +39,8 @@ function SpeciesSection({
               alt={cover.title}
               fill
               sizes="(max-width: 1024px) 100vw, 50vw"
-              className="object-cover"
+              className="pointer-events-none object-cover select-none"
+              draggable={false}
             />
           </div>
           <div className="flex flex-col justify-center">

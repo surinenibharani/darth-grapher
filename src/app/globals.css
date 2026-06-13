@@ -14,6 +14,13 @@
   ::selection {
     @apply bg-gold/30 text-ivory;
   }
+
+  img,
+  video {
+    -webkit-user-drag: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
 }
 
 @layer utilities {

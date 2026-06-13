@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Photo } from "@/data/photos";
+import PhotoComments from "@/components/PhotoComments";
 
 interface LightboxProps {
   photo: Photo | null;
@@ -12,7 +13,7 @@ interface LightboxProps {
 
 function CaptionPanel({ photo }: { photo: Photo }) {
   return (
-    <aside className="flex min-h-0 flex-col justify-center gap-4 lg:max-h-[85vh] lg:w-80 lg:shrink-0 lg:overflow-y-auto lg:pr-2">
+    <aside className="flex min-h-0 flex-col justify-start gap-4 lg:max-h-[85vh] lg:w-96 lg:shrink-0 lg:overflow-y-auto lg:pr-2">
       {photo.birdGroup && (
         <p className="font-sans text-xs uppercase tracking-[0.3em] text-gold">
           {photo.birdGroup}
@@ -39,6 +40,7 @@ function CaptionPanel({ photo }: { photo: Photo }) {
           View on Instagram
         </a>
       )}
+      <PhotoComments photoId={photo.id} />
     </aside>
   );
 }
@@ -134,8 +136,12 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
                   src={photo.videoUrl}
                   poster={photo.src}
                   controls
+                  controlsList="nodownload noremoteplayback"
+                  disablePictureInPicture
                   playsInline
                   autoPlay
+                  onContextMenu={(e) => e.preventDefault()}
+                  draggable={false}
                   className="max-h-[50vh] w-full object-contain lg:max-h-[85vh]"
                 />
               ) : (
@@ -145,7 +151,9 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
                     alt={photo.title}
                     fill
                     sizes="(max-width: 1024px) 100vw, 65vw"
-                    className="object-contain"
+                    className="pointer-events-none object-contain select-none"
+                    draggable={false}
+                    onContextMenu={(e) => e.preventDefault()}
                     priority
                   />
                 </div>
