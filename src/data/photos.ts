@@ -22,7 +22,8 @@ export const speciesLabels: Record<Species, { label: string; description: string
   reptiles: { label: "Reptiles & Amphibians", description: "Ancient forms, patient eyes, and perfect camouflage." },
 };
 
-export const photos: Photo[] = [
+/** Local fallback used when Instagram Graph API is not configured. */
+export const fallbackPhotos: Photo[] = [
   {
     id: "01",
     src: "/images/0C7A3379-topaz-denoise-sharpen.jpg",
@@ -92,9 +93,3 @@ export const photos: Photo[] = [
     instagramUrl: "https://www.instagram.com/p/DYccGt6g6rq/",
   },
 ];
-
-export const featuredPhotos = photos.filter((p) => p.featured);
-
-export function getPhotosBySpecies(species: Species): Photo[] {
-  return photos.filter((p) => p.species === species);
-}

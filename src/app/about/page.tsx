@@ -1,14 +1,18 @@
 import Image from "next/image";
-import { photos } from "@/data/photos";
 import FadeIn from "@/components/FadeIn";
+import { getPhotos } from "@/lib/photos";
 
 export const metadata = {
   title: "About | Darth Grapher",
   description: "Learn about the photographer behind Darth Grapher.",
 };
 
-export default function AboutPage() {
-  const portrait = photos[5];
+export const revalidate = 3600;
+
+export default async function AboutPage() {
+  const photos = await getPhotos();
+  const portrait = photos[5] ?? photos[0];
+  const collectionCount = new Set(photos.map((photo) => photo.species)).size;
 
   return (
     <div className="min-h-screen pt-32 pb-20">
@@ -60,13 +64,13 @@ export default function AboutPage() {
 
             <FadeIn delay={0.45} className="mt-12 grid grid-cols-3 gap-8 border-t border-white/5 pt-12">
               <div>
-                <p className="font-display text-3xl text-gold">7</p>
+                <p className="font-display text-3xl text-gold">{photos.length}</p>
                 <p className="mt-1 font-sans text-xs uppercase tracking-widest text-mist">
-                  Instagram-Matched Images
+                  Portfolio Images
                 </p>
               </div>
               <div>
-                <p className="font-display text-3xl text-gold">4</p>
+                <p className="font-display text-3xl text-gold">{collectionCount}</p>
                 <p className="mt-1 font-sans text-xs uppercase tracking-widest text-mist">
                   Collections
                 </p>

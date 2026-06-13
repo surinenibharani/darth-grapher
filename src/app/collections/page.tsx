@@ -1,10 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  speciesLabels,
-  getPhotosBySpecies,
-  type Species,
-} from "@/data/photos";
+import { speciesLabels, type Species } from "@/data/photos";
+import { getPhotosBySpecies } from "@/lib/photos";
 import FadeIn from "@/components/FadeIn";
 
 const speciesOrder: Species[] = ["birds", "mammals", "marine", "reptiles"];
@@ -14,7 +11,20 @@ export const metadata = {
   description: "Wildlife photography organized by species collections.",
 };
 
-export default function CollectionsPage() {
+export const revalidate = 3600;
+
+export default async function CollectionsPage() {
+  const collections = await Promise.all(
+    speciesOrder.map(async (species) => ({
+      species,
+      collection: await getPhotosBySpecies(species),
+    }))
+  );
+
+  const activeCollections = collections.filter(
+    ({ collection }) => collection.length > 0
+  );
+
   return (
     <div className="min-h-screen pt-32 pb-20">
       <div className="mx-auto max-w-7xl px-6 lg:px-10">
@@ -32,13 +42,7 @@ export default function CollectionsPage() {
         </FadeIn>
 
         <div className="mt-20 space-y-32">
-          {speciesOrder
-            .map((species) => ({
-              species,
-              collection: getPhotosBySpecies(species),
-            }))
-            .filter(({ collection }) => collection.length > 0)
-            .map(({ species, collection }, sectionIndex) => {
+          {activeCollections.map(({ species, collection }, sectionIndex) => {
             const { label, description } = speciesLabels[species];
             const cover = collection[0];
 

@@ -60,6 +60,16 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
                   {photo.notes}
                 </p>
               )}
+              {photo.instagramUrl && (
+                <a
+                  href={photo.instagramUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-4 inline-block font-sans text-xs uppercase tracking-widest text-gold transition-colors hover:text-ivory"
+                >
+                  View on Instagram
+                </a>
+              )}
             </div>
           </motion.div>
         </motion.div>
