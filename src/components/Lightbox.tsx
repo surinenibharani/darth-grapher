@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Photo } from "@/data/photos";
@@ -11,43 +11,102 @@ interface LightboxProps {
   onClose: () => void;
 }
 
-function CaptionPanel({ photo }: { photo: Photo }) {
+function firstLine(text: string): string {
+  const line = text.trim().split("\n").find(Boolean) ?? text.trim();
+  return line;
+}
+
+interface CaptionPanelProps {
+  photo: Photo;
+  expanded: boolean;
+  onExpandedChange: (expanded: boolean) => void;
+}
+
+function CaptionPanel({
+  photo,
+  expanded,
+  onExpandedChange,
+}: CaptionPanelProps) {
+  const notesPreview = photo.notes?.trim() ? firstLine(photo.notes) : null;
+  const canExpand = Boolean(
+    photo.notes?.trim() ||
+      photo.birdGroup ||
+      photo.instagramUrl ||
+      photo.title.length > 60
+  );
+
   return (
-    <aside className="flex min-h-0 flex-col justify-start gap-4 lg:max-h-[85vh] lg:w-96 lg:shrink-0 lg:overflow-y-auto lg:pr-2">
-      {photo.birdGroup && (
-        <p className="font-sans text-xs uppercase tracking-[0.3em] text-gold">
-          {photo.birdGroup}
-        </p>
-      )}
-      <h3 className="font-display text-2xl font-light leading-snug text-ivory md:text-3xl">
-        {photo.title}
-      </h3>
-      <p className="font-sans text-xs uppercase tracking-widest text-mist">
-        {photo.location}
-      </p>
-      {photo.notes && (
-        <p className="font-sans text-sm leading-relaxed text-mist">
-          {photo.notes}
-        </p>
-      )}
-      {photo.instagramUrl && (
-        <a
-          href={photo.instagramUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-2 inline-block font-sans text-xs uppercase tracking-widest text-gold transition-colors hover:text-ivory"
+    <div
+      className="shrink-0 border-t border-white/10 bg-void px-5 py-4 md:px-8 md:py-5"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <div className={expanded ? "max-h-[40vh] overflow-y-auto pr-1" : ""}>
+        {photo.birdGroup && expanded && (
+          <p className="font-sans text-xs uppercase tracking-[0.3em] text-gold">
+            {photo.birdGroup}
+          </p>
+        )}
+
+        <h3
+          className={`font-display font-light text-ivory ${
+            expanded
+              ? "mt-2 text-2xl leading-snug md:text-3xl"
+              : "truncate text-xl md:text-2xl"
+          }`}
         >
-          View on Instagram
-        </a>
+          {photo.title}
+        </h3>
+
+        <p className="mt-1 font-sans text-xs uppercase tracking-widest text-mist">
+          {photo.location}
+        </p>
+
+        {notesPreview && (
+          <p
+            className={`mt-3 font-sans text-sm leading-relaxed text-mist/90 ${
+              expanded ? "" : "line-clamp-1"
+            }`}
+          >
+            {expanded ? photo.notes : notesPreview}
+          </p>
+        )}
+
+        {expanded && photo.instagramUrl && (
+          <a
+            href={photo.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-block font-sans text-xs uppercase tracking-widest text-gold transition-colors hover:text-ivory"
+          >
+            View on Instagram
+          </a>
+        )}
+
+        {expanded && <PhotoComments photoId={photo.id} />}
+      </div>
+
+      {canExpand && (
+        <button
+          type="button"
+          onClick={() => onExpandedChange(!expanded)}
+          className="mt-3 font-sans text-xs uppercase tracking-widest text-gold transition-colors hover:text-ivory"
+          aria-expanded={expanded}
+        >
+          {expanded ? "Show Less" : "Read More"}
+        </button>
       )}
-      <PhotoComments photoId={photo.id} />
-    </aside>
+    </div>
   );
 }
 
 export default function Lightbox({ photo, onClose }: LightboxProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const [expanded, setExpanded] = useState(false);
+
+  useEffect(() => {
+    setExpanded(false);
+  }, [photo?.id]);
 
   useEffect(() => {
     if (!photo) return;
@@ -60,7 +119,7 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
       if (!dialogRef.current) return [];
       return Array.from(
         dialogRef.current.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), a[href], video[controls], [tabindex]:not([tabindex="-1"])'
+          'button:not([disabled]), a[href], video[controls], textarea, input:not([type="hidden"]), [tabindex]:not([tabindex="-1"])'
         )
       ).filter((el) => !el.hasAttribute("disabled") && el.offsetParent !== null);
     }
@@ -97,6 +156,12 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
     };
   }, [photo, onClose]);
 
+  function handlePhotoClick() {
+    if (expanded) {
+      setExpanded(false);
+    }
+  }
+
   return (
     <AnimatePresence>
       {photo && (
@@ -108,60 +173,68 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-void/95 p-4 backdrop-blur-sm md:p-8"
-          onClick={onClose}
+          transition={{ duration: 0.25 }}
+          className="fixed inset-0 z-[100] flex h-[100dvh] w-screen flex-col bg-void"
         >
-          <button
-            ref={closeRef}
-            type="button"
-            aria-label="Close"
-            onClick={onClose}
-            className="absolute right-6 top-6 z-10 font-sans text-xs uppercase tracking-widest text-mist transition-colors hover:text-ivory"
+          <div
+            role={expanded ? "button" : undefined}
+            tabIndex={expanded ? 0 : -1}
+            aria-label={expanded ? "Collapse caption" : undefined}
+            onClick={handlePhotoClick}
+            onKeyDown={(event) => {
+              if (
+                expanded &&
+                (event.key === "Enter" || event.key === " ")
+              ) {
+                event.preventDefault();
+                setExpanded(false);
+              }
+            }}
+            className="relative min-h-0 flex-1 bg-void"
           >
-            Close
-          </button>
+            <button
+              ref={closeRef}
+              type="button"
+              aria-label="Close"
+              onClick={onClose}
+              className="absolute right-5 top-5 z-20 font-sans text-xs uppercase tracking-widest text-mist transition-colors hover:text-ivory md:right-8 md:top-8"
+            >
+              Close
+            </button>
 
-          <motion.div
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            exit={{ scale: 0.95, opacity: 0 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="flex max-h-[90vh] w-full max-w-7xl flex-col gap-6 overflow-y-auto lg:max-h-[85vh] lg:flex-row lg:items-center lg:gap-10 lg:overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative flex min-h-[40vh] w-full flex-1 items-center justify-center bg-charcoal lg:min-h-0 lg:max-h-[85vh] lg:self-stretch">
-              {photo.videoUrl ? (
-                <video
-                  src={photo.videoUrl}
-                  poster={photo.src}
-                  controls
-                  controlsList="nodownload noremoteplayback"
-                  disablePictureInPicture
-                  playsInline
-                  autoPlay
-                  onContextMenu={(e) => e.preventDefault()}
-                  draggable={false}
-                  className="max-h-[50vh] w-full object-contain lg:max-h-[85vh]"
-                />
-              ) : (
-                <div className="relative h-[50vh] w-full lg:h-full lg:min-h-[50vh] lg:max-h-[85vh]">
-                  <Image
-                    src={photo.src}
-                    alt={photo.title}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 65vw"
-                    className="pointer-events-none object-contain select-none"
-                    draggable={false}
-                    onContextMenu={(e) => e.preventDefault()}
-                    priority
-                  />
-                </div>
-              )}
-            </div>
+            {photo.videoUrl ? (
+              <video
+                src={photo.videoUrl}
+                poster={photo.src}
+                controls
+                controlsList="nodownload noremoteplayback"
+                disablePictureInPicture
+                playsInline
+                autoPlay
+                onContextMenu={(e) => e.preventDefault()}
+                draggable={false}
+                onClick={(e) => e.stopPropagation()}
+                className="pointer-events-auto h-full w-full object-contain"
+              />
+            ) : (
+              <Image
+                src={photo.src}
+                alt={photo.title}
+                fill
+                sizes="100vw"
+                className="pointer-events-none object-contain select-none"
+                draggable={false}
+                onContextMenu={(e) => e.preventDefault()}
+                priority
+              />
+            )}
+          </div>
 
-            <CaptionPanel photo={photo} />
-          </motion.div>
+          <CaptionPanel
+            photo={photo}
+            expanded={expanded}
+            onExpandedChange={setExpanded}
+          />
         </motion.div>
       )}
     </AnimatePresence>
