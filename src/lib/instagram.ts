@@ -1,4 +1,5 @@
 import type { Photo, Species } from "@/data/photos";
+import { birdGroupFromCaption } from "@/lib/bird-groups";
 
 const GRAPH_API = "https://graph.facebook.com/v21.0";
 const MEDIA_FIELDS =
@@ -155,13 +156,19 @@ export async function fetchInstagramPhotos(limit = 50): Promise<Photo[]> {
     const title = caption ? titleFromCaption(caption) : "Untitled";
     const notes = caption ? notesFromCaption(caption) : "";
 
+    const species = caption ? speciesFromCaption(caption) : "birds";
+
     return {
       id: item.id,
       src: item.src,
       title,
       notes,
       location: "Pennsylvania",
-      species: caption ? speciesFromCaption(caption) : "birds",
+      species,
+      birdGroup:
+        species === "birds" && caption
+          ? birdGroupFromCaption(caption) ?? undefined
+          : undefined,
       instagramUrl: item.permalink,
       featured: index < 5,
     };
