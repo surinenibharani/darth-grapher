@@ -44,21 +44,24 @@ export default async function AboutPage() {
 
             <FadeIn delay={0.3} className="mt-10 space-y-6">
               <p className="font-sans text-sm leading-relaxed text-mist">
-                Darth Grapher is a wildlife photographer driven by a deep respect
-                for the natural world. Every image begins long before the
-                shutter clicks — in the pre-dawn hikes, the hours of stillness,
-                and the quiet understanding that we are guests in wild places.
+                Darth Grapher is a wildlife photographer guided by a profound
+                respect for the natural world. Every image begins long before the
+                shutter clicks — in pre-dawn hikes, patient hours of stillness,
+                and the humble awareness that we are only guests in these wild
+                places.
               </p>
               <p className="font-sans text-sm leading-relaxed text-mist">
-                Inspired by the storytelling traditions of National Geographic
-                and the cinematic eye of masters like Paul Nicklen, the work
-                seeks to bridge the gap between viewer and subject — creating
-                moments of connection that inspire conservation and wonder.
+                Inspired by the powerful storytelling of National Geographic and
+                the evocative narration of Sir David Attenborough, his work aims
+                to bridge the gap between viewer and subject. Through quiet,
+                intimate moments, he seeks to spark a deeper connection with
+                nature — one that inspires conservation and a lasting sense of
+                wonder.
               </p>
               <p className="font-sans text-sm leading-relaxed text-mist">
-                From coastal estuaries to mountain ridgelines, each photograph
-                is a testament to patience, craft, and the extraordinary beauty
-                that exists when we simply pay attention.
+                From misty coastal estuaries to rugged mountain ridgelines, each
+                photograph reflects patience, dedication, and the extraordinary
+                beauty revealed when we simply slow down and pay attention.
               </p>
             </FadeIn>
 
