@@ -1,26 +1,10 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import type { Photo } from "@/data/photos";
 import FadeIn from "@/components/FadeIn";
-
-function heroObjectPosition(width: number, height: number): string {
-  const ratio = width / height;
-
-  if (ratio < 0.85) {
-    // Portrait — anchor to top so the bird's head stays in frame
-    return "center top";
-  }
-  if (ratio < 1.2) {
-    // Square or near-square — bias slightly above center
-    return "center 28%";
-  }
-  // Landscape — keep upper third where subjects usually sit
-  return "center 32%";
-}
 
 interface HomePageClientProps {
   selectedMoments: Photo[];
@@ -33,8 +17,6 @@ export default function HomePageClient({
   heroPhoto,
   usingInstagram,
 }: HomePageClientProps) {
-  const [heroPosition, setHeroPosition] = useState("center 30%");
-
   if (!heroPhoto && selectedMoments.length === 0) {
     return (
       <div className="flex min-h-screen items-center justify-center px-6 pt-32">
@@ -53,28 +35,21 @@ export default function HomePageClient({
 
   return (
     <>
-      <section className="relative flex h-screen items-end overflow-hidden">
+      <section className="relative flex h-screen items-end overflow-hidden bg-void">
         <motion.div
-          initial={{ scale: 1.08 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 2.5, ease: [0.22, 1, 0.36, 1] }}
+          key={hero.id}
+          initial={{ scale: 1 }}
+          animate={{ scale: 1.12 }}
+          transition={{ duration: 20, ease: "easeOut" }}
           className="absolute inset-0"
         >
           <Image
-            key={hero.id}
             src={hero.src}
             alt={hero.title}
             fill
             priority
             sizes="100vw"
-            className="object-cover"
-            style={{ objectPosition: heroPosition }}
-            onLoad={(e) => {
-              const img = e.currentTarget;
-              setHeroPosition(
-                heroObjectPosition(img.naturalWidth, img.naturalHeight)
-              );
-            }}
+            className="object-contain"
           />
         </motion.div>
         <div className="absolute inset-0 bg-gradient-to-t from-void via-void/40 to-void/20" />
