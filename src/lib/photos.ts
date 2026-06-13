@@ -28,17 +28,22 @@ export async function getFeaturedPhotos(): Promise<Photo[]> {
   return featured.length > 0 ? featured : photos.slice(0, 5);
 }
 
-/** Hero: always a bird still image — never a video thumbnail. */
+/** Hero: random bird still image on each page load — never a video thumbnail. */
 export async function getHeroPhoto(): Promise<Photo | null> {
   const photos = await getPhotos();
-  const birdImage = photos.find(
+  const birdPortraits = photos.filter(
     (photo) => photo.species === "birds" && photo.mediaType !== "VIDEO"
   );
 
+  const pickRandom = (items: Photo[]) =>
+    items.length > 0
+      ? items[Math.floor(Math.random() * items.length)]
+      : null;
+
   return (
-    birdImage ??
-    photos.find((photo) => photo.species === "birds") ??
-    photos.find((photo) => photo.mediaType !== "VIDEO") ??
+    pickRandom(birdPortraits) ??
+    pickRandom(photos.filter((photo) => photo.species === "birds")) ??
+    pickRandom(photos.filter((photo) => photo.mediaType !== "VIDEO")) ??
     photos[0] ??
     null
   );
