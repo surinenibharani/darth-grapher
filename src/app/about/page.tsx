@@ -1,6 +1,6 @@
 import Image from "next/image";
 import FadeIn from "@/components/FadeIn";
-import { getAboutPortrait, getPhotos } from "@/lib/photos";
+import { getAboutPortrait, getCollectionCount, getPhotos } from "@/lib/photos";
 
 export const metadata = {
   title: "About | Darth Grapher",
@@ -11,7 +11,7 @@ export const revalidate = 3600;
 
 export default async function AboutPage() {
   const [photos, portrait] = await Promise.all([getPhotos(), getAboutPortrait()]);
-  const collectionCount = new Set(photos.map((photo) => photo.species)).size;
+  const collectionCount = getCollectionCount(photos);
 
   return (
     <div className="min-h-screen pt-32 pb-20">

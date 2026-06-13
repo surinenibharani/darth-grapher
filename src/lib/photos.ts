@@ -61,6 +61,14 @@ export async function getPhotos(): Promise<Photo[]> {
     return fallbackPhotos;
   }
 
+  const health = await checkInstagramHealth();
+  if (!health.ok) {
+    console.error("[Instagram] Health check failed, using fallback photos.");
+    if (health.error) console.error("[Instagram] Health check:", health.error);
+    if (health.hint) console.error("[Instagram] Fix:", health.hint);
+    return fallbackPhotos;
+  }
+
   try {
     return sortPhotosByNewest(await getCachedInstagramPhotos());
   } catch (error) {
@@ -135,12 +143,36 @@ export async function getAboutPortrait(): Promise<Photo> {
 export async function isUsingInstagramFeed(): Promise<boolean> {
   if (!isInstagramConfigured()) return false;
 
+  const health = await checkInstagramHealth();
+  if (!health.ok) return false;
+
   try {
     await getCachedInstagramPhotos();
     return true;
   } catch {
     return false;
   }
+}
+
+/** Count collections: bird species groups + one per non-bird species with photos. */
+export function getCollectionCount(photos: Photo[]): number {
+  const speciesWithPhotos = new Set(photos.map((photo) => photo.species));
+  let count = 0;
+
+  for (const species of speciesWithPhotos) {
+    if (species === "birds") {
+      const birdGroups = new Set(
+        photos
+          .filter((photo) => photo.species === "birds" && photo.birdGroup)
+          .map((photo) => photo.birdGroup)
+      );
+      count += birdGroups.size > 0 ? birdGroups.size : 1;
+    } else {
+      count += 1;
+    }
+  }
+
+  return count;
 }
 
 /** Server-only diagnostic — run via `npm run check:instagram`. */
