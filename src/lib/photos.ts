@@ -1,6 +1,10 @@
 import { unstable_cache } from "next/cache";
 import type { Photo, Species } from "@/data/photos";
-import { fallbackPhotos } from "@/data/photos";
+import {
+  ABOUT_PORTRAIT_SHORTCODE,
+  aboutPortrait,
+  fallbackPhotos,
+} from "@/data/photos";
 import { fetchInstagramPhotos, isInstagramConfigured } from "@/lib/instagram";
 
 const getCachedInstagramPhotos = unstable_cache(
@@ -52,6 +56,30 @@ export async function getHeroPhoto(): Promise<Photo | null> {
 export async function getPhotosBySpecies(species: Species): Promise<Photo[]> {
   const photos = await getPhotos();
   return photos.filter((photo) => photo.species === species);
+}
+
+/** About page portrait — tree swallow from Instagram post DY2ygCTuPcX. */
+export async function getAboutPortrait(): Promise<Photo> {
+  const photos = await getPhotos();
+  const fromFeed = photos.find((photo) =>
+    photo.instagramUrl?.includes(ABOUT_PORTRAIT_SHORTCODE)
+  );
+
+  if (fromFeed) return fromFeed;
+
+  if (isInstagramConfigured()) {
+    try {
+      const extended = await fetchInstagramPhotos(100);
+      const match = extended.find((photo) =>
+        photo.instagramUrl?.includes(ABOUT_PORTRAIT_SHORTCODE)
+      );
+      if (match) return match;
+    } catch {
+      // Fall through to local portrait
+    }
+  }
+
+  return aboutPortrait;
 }
 
 export async function isUsingInstagramFeed(): Promise<boolean> {

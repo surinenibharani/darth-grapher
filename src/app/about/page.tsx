@@ -1,6 +1,6 @@
 import Image from "next/image";
 import FadeIn from "@/components/FadeIn";
-import { getPhotos } from "@/lib/photos";
+import { getAboutPortrait, getPhotos } from "@/lib/photos";
 
 export const metadata = {
   title: "About | Darth Grapher",
@@ -10,8 +10,7 @@ export const metadata = {
 export const revalidate = 3600;
 
 export default async function AboutPage() {
-  const photos = await getPhotos();
-  const portrait = photos[5] ?? photos[0];
+  const [photos, portrait] = await Promise.all([getPhotos(), getAboutPortrait()]);
   const collectionCount = new Set(photos.map((photo) => photo.species)).size;
 
   return (
@@ -22,7 +21,7 @@ export default async function AboutPage() {
             <div className="relative aspect-[3/4] overflow-hidden">
               <Image
                 src={portrait.src}
-                alt="Photographer at work"
+                alt={portrait.title}
                 fill
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 className="object-cover"

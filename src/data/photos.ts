@@ -105,3 +105,17 @@ export const fallbackPhotos: Photo[] = [
     instagramUrl: "https://www.instagram.com/p/DYccGt6g6rq/",
   },
 ];
+
+export const ABOUT_PORTRAIT_SHORTCODE = "DY2ygCTuPcX";
+
+/** Tree swallow portrait used on the About page. */
+export const aboutPortrait: Photo = {
+  id: "about-portrait",
+  src: "/images/about-tree-swallow.jpg",
+  title: "Tree Swallow over water",
+  notes: "A tree swallow skims low over the water's surface, wings slicing the air.",
+  location: "Pennsylvania",
+  species: "birds",
+  birdGroup: "Tree Swallow",
+  instagramUrl: "https://www.instagram.com/p/DY2ygCTuPcX/",
+};
