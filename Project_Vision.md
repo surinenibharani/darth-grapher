@@ -30,6 +30,10 @@ Create a premium photography portfolio that showcases wildlife images in an imme
 - About
 - Contact
 
+## Pictures
+- Pick 20 random pictures from /Users/bharanisurineni/Pictures/TopazAI/2026 to put in into the website
+- For titles and photo descriptions use only pictures from https://www.instagram.com/darthgrapher/
+
 ## Future Features
 - Print sales
 - Client galleries
