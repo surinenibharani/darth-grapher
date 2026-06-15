@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import OptimizedImage from "@/components/OptimizedImage";
-import { useRouter } from "next/navigation";
+import Lightbox from "@/components/Lightbox";
 import type { Photo } from "@/data/photos";
-import { photoPortfolioPath } from "@/lib/photo-url";
 import VideoPlayButton, { isVideoPost } from "@/components/VideoPlayButton";
 
 interface CollectionsPhotoGridProps {
@@ -13,34 +13,61 @@ interface CollectionsPhotoGridProps {
 export default function CollectionsPhotoGrid({
   photos,
 }: CollectionsPhotoGridProps) {
-  const router = useRouter();
+  const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
+  const selectedIndex = selectedPhoto
+    ? photos.findIndex((p) => p.id === selectedPhoto.id)
+    : -1;
+
+  function navigate(direction: "prev" | "next") {
+    if (selectedIndex < 0) return;
+    const nextIndex =
+      direction === "prev" ? selectedIndex - 1 : selectedIndex + 1;
+    if (nextIndex < 0 || nextIndex >= photos.length) return;
+    setSelectedPhoto(photos[nextIndex]);
+  }
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
-      {photos.map((photo) => (
-        <button
-          key={photo.id}
-          type="button"
-          onClick={() => router.push(photoPortfolioPath(photo.id))}
-          className="group relative aspect-square cursor-zoom-in overflow-hidden"
-        >
-          <OptimizedImage
-            src={photo.src}
-            alt={photo.title}
-            fill
-            sizes="(max-width: 768px) 50vw, 25vw"
-            className="pointer-events-none object-cover select-none transition-transform duration-700 group-hover:scale-105"
-            draggable={false}
-            onContextMenu={(e) => e.preventDefault()}
-          />
-          {isVideoPost(photo) && <VideoPlayButton size="sm" />}
-          <div className="absolute inset-0 flex items-end bg-gradient-to-t from-void/80 to-transparent p-3 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-            <p className="font-sans text-[10px] uppercase tracking-widest text-ivory">
-              {photo.title}
-            </p>
-          </div>
-        </button>
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
+        {photos.map((photo) => (
+          <button
+            key={photo.id}
+            type="button"
+            onClick={() => setSelectedPhoto(photo)}
+            className="group relative aspect-square cursor-zoom-in overflow-hidden"
+          >
+            <OptimizedImage
+              src={photo.src}
+              alt={photo.title}
+              fill
+              sizes="(max-width: 768px) 50vw, 25vw"
+              className="pointer-events-none object-cover select-none transition-transform duration-700 group-hover:scale-105"
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+            />
+            {isVideoPost(photo) && <VideoPlayButton size="sm" />}
+            <div className="absolute inset-0 flex items-end bg-gradient-to-t from-void/80 to-transparent p-3 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+              <p className="font-sans text-[10px] uppercase tracking-widest text-ivory">
+                {photo.title}
+              </p>
+            </div>
+          </button>
+        ))}
+      </div>
+
+      <Lightbox
+        photo={selectedPhoto}
+        photoIndex={selectedIndex >= 0 ? selectedIndex : undefined}
+        photoCount={photos.length}
+        onClose={() => setSelectedPhoto(null)}
+        onPrevious={selectedIndex > 0 ? () => navigate("prev") : undefined}
+        onNext={
+          selectedIndex >= 0 && selectedIndex < photos.length - 1
+            ? () => navigate("next")
+            : undefined
+        }
+        analyticsSource="collections"
+      />
+    </>
   );
 }

@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import FeedStatusBanner from "@/components/FeedStatusBanner";
 import MediaProtection from "@/components/MediaProtection";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import BackToTop from "@/components/BackToTop";
 import { rootMetadata } from "@/lib/metadata";
 import "./globals.css";
 
@@ -40,6 +41,7 @@ export default function RootLayout({
           {children}
         </main>
         <Footer />
+        <BackToTop />
       </body>
     </html>
   );

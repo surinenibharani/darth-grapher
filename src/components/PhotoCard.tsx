@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import OptimizedImage from "@/components/OptimizedImage";
 import { motion } from "framer-motion";
 import type { Photo } from "@/data/photos";
@@ -25,6 +26,7 @@ export default function PhotoCard({
   aspect = "landscape",
   onClick,
 }: PhotoCardProps) {
+  const [loaded, setLoaded] = useState(false);
   const Wrapper = onClick ? "button" : "div";
 
   return (
@@ -40,14 +42,20 @@ export default function PhotoCard({
         onClick={onClick}
         className={`relative block w-full overflow-hidden ${aspectClasses[aspect]} ${onClick ? "cursor-zoom-in" : ""}`}
       >
+        {!loaded && (
+          <div className="absolute inset-0 animate-pulse bg-smoke/70" aria-hidden />
+        )}
         <OptimizedImage
           src={photo.src}
           alt={photo.title}
           fill
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-          className="pointer-events-none object-cover select-none transition-transform duration-700 ease-out group-hover:scale-105"
+          className={`pointer-events-none object-cover select-none transition-all duration-700 ease-out group-hover:scale-105 ${
+            loaded ? "opacity-100" : "opacity-0"
+          }`}
           draggable={false}
           onContextMenu={(e) => e.preventDefault()}
+          onLoadingComplete={() => setLoaded(true)}
         />
         {isVideoPost(photo) && <VideoPlayButton />}
         <div className="absolute inset-0 bg-gradient-to-t from-void/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
