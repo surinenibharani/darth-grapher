@@ -5,6 +5,7 @@ import Footer from "@/components/Footer";
 import FeedStatusBanner from "@/components/FeedStatusBanner";
 import MediaProtection from "@/components/MediaProtection";
 import GoogleAnalytics from "@/components/GoogleAnalytics";
+import { rootMetadata } from "@/lib/metadata";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -21,15 +22,7 @@ const outfit = Outfit({
   display: "swap",
 });
 
-export const metadata: Metadata = {
-  title: "Darth Grapher | Wildlife Photography",
-  description:
-    "A premium wildlife photography portfolio showcasing the beauty and power of the natural world.",
-  icons: {
-    icon: "/images/about-tree-swallow.jpg",
-    apple: "/images/about-tree-swallow.jpg",
-  },
-};
+export const metadata: Metadata = rootMetadata;
 
 export default function RootLayout({
   children,

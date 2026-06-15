@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import OptimizedImage from "@/components/OptimizedImage";
 import Link from "next/link";
 import { speciesLabels, type Photo, type Species } from "@/data/photos";
@@ -5,13 +6,16 @@ import { groupBirdPhotos } from "@/lib/bird-groups";
 import { getPhotosBySpecies } from "@/lib/photos";
 import FadeIn from "@/components/FadeIn";
 import CollectionsPhotoGrid from "@/components/CollectionsPhotoGrid";
+import { pageMetadata } from "@/lib/metadata";
 
 const speciesOrder: Species[] = ["birds", "mammals", "marine", "reptiles"];
 
-export const metadata = {
-  title: "Collections | Darth Grapher",
-  description: "Wildlife photography organized by species collections.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Collections",
+  description:
+    "Wildlife photography organized by species — birds, mammals, marine life, and reptiles from @darthgrapher.",
+  path: "/collections",
+});
 
 export const revalidate = 3600;
 

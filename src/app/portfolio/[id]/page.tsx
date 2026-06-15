@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import PortfolioPageContent from "@/components/PortfolioPageContent";
-import { decodePhotoId } from "@/lib/photo-url";
+import { decodePhotoId, photoPortfolioPath } from "@/lib/photo-url";
+import { pageMetadata } from "@/lib/metadata";
 import { getPhotoById } from "@/lib/photos";
 
 export const revalidate = 3600;
@@ -17,18 +18,20 @@ export async function generateMetadata({
   const photo = await getPhotoById(decodePhotoId(id));
 
   if (!photo) {
-    return { title: "Photo Not Found | Darth Grapher" };
+    return { title: "Photo Not Found" };
   }
 
-  return {
-    title: `${photo.title} | Darth Grapher`,
-    description: photo.notes || photo.title,
-    openGraph: {
-      title: photo.title,
-      description: photo.notes || photo.title,
-      images: [{ url: photo.src }],
-    },
-  };
+  const description =
+    photo.notes?.trim().slice(0, 160) ||
+    `${photo.title} — wildlife photography by Darth Grapher in ${photo.location}.`;
+
+  return pageMetadata({
+    title: photo.title,
+    description,
+    path: photoPortfolioPath(photo.id),
+    ogImage: photo.src,
+    ogType: "article",
+  });
 }
 
 export default async function PortfolioPhotoPage({ params }: PhotoPageProps) {

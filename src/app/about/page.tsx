@@ -1,11 +1,16 @@
+import type { Metadata } from "next";
 import OptimizedImage from "@/components/OptimizedImage";
 import FadeIn from "@/components/FadeIn";
 import { getAboutPortrait, getCollectionCount, getPhotos } from "@/lib/photos";
+import { pageMetadata } from "@/lib/metadata";
 
-export const metadata = {
-  title: "About | Darth Grapher",
-  description: "Learn about the photographer behind Darth Grapher.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "About",
+  description:
+    "The story behind Darth Grapher — wildlife photographer capturing patience, wonder, and the wild places of Pennsylvania.",
+  path: "/about",
+  ogImage: "/images/about-tree-swallow.jpg",
+});
 
 export const revalidate = 3600;
 

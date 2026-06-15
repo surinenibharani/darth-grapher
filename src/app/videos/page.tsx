@@ -1,11 +1,15 @@
+import type { Metadata } from "next";
 import PhotoGrid from "@/components/PhotoGrid";
 import FadeIn from "@/components/FadeIn";
 import { getVideoPosts, isUsingInstagramFeed } from "@/lib/photos";
+import { pageMetadata } from "@/lib/metadata";
 
-export const metadata = {
-  title: "Videos | Darth Grapher",
-  description: "Wildlife video moments from @darthgrapher on Instagram.",
-};
+export const metadata: Metadata = pageMetadata({
+  title: "Videos",
+  description:
+    "Wildlife video moments from @darthgrapher — eagles, birds, and nature in motion.",
+  path: "/videos",
+});
 
 export const revalidate = 3600;
 
