@@ -139,8 +139,7 @@ export default function HomePageClient({
               Selected Moments
             </h2>
             <p className="mt-4 max-w-lg font-sans text-sm leading-relaxed text-mist">
-              Nine close-up portraits of Pennsylvania birds — intimate frames
-              drawn from the wild.
+              Intimate frames drawn from the wild.
             </p>
           </FadeIn>
 

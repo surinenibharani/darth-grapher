@@ -5,6 +5,11 @@ import { getPhotos, isUsingInstagramFeed } from "@/lib/photos";
 
 const elfsightWidgetId = process.env.NEXT_PUBLIC_ELFSIGHT_WIDGET_ID;
 
+const instagramProfileUrl = "https://www.instagram.com/darthgrapher/";
+
+const instagramLinkClass =
+  "text-gold transition-colors hover:text-ivory";
+
 interface PortfolioPageContentProps {
   initialPhotoId?: string;
 }
@@ -30,11 +35,35 @@ export default async function PortfolioPageContent({
             The Archive
           </h1>
           <p className="mt-6 max-w-xl font-sans text-sm leading-relaxed text-mist">
-            {usingElfsight
-              ? "Live Instagram feed from @darthgrapher, powered by Elfsight."
-              : usingInstagram
-                ? "Photos loaded from @darthgrapher via the Instagram Graph API."
-                : "Showing local fallback photos. Connect Elfsight or Instagram Graph API to load your feed."}
+            {usingElfsight ? (
+              <>
+                Live Instagram feed from{" "}
+                <a
+                  href={instagramProfileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={instagramLinkClass}
+                >
+                  @darthgrapher
+                </a>
+                , powered by Elfsight.
+              </>
+            ) : usingInstagram ? (
+              <>
+                Photos loaded from{" "}
+                <a
+                  href={instagramProfileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={instagramLinkClass}
+                >
+                  @darthgrapher
+                </a>{" "}
+                via Instagram.
+              </>
+            ) : (
+              "Showing local fallback photos. Connect Elfsight or Instagram Graph API to load your feed."
+            )}
           </p>
         </FadeIn>
 
