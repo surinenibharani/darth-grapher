@@ -5,6 +5,7 @@ import OptimizedImage from "@/components/OptimizedImage";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Photo } from "@/data/photos";
 import PhotoComments from "@/components/PhotoComments";
+import PhotoShareButtons from "@/components/PhotoShareButtons";
 import { trackPhotoOpen } from "@/lib/analytics";
 
 interface LightboxProps {
@@ -66,6 +67,8 @@ function CaptionPanel({
         <p className="mt-1 font-sans text-xs uppercase tracking-widest text-mist">
           {photo.location}
         </p>
+
+        <PhotoShareButtons photo={photo} />
 
         {notesPreview && (
           <p
