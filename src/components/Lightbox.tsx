@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
+import OptimizedImage from "@/components/OptimizedImage";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Photo } from "@/data/photos";
 import PhotoComments from "@/components/PhotoComments";
@@ -282,15 +282,15 @@ export default function Lightbox({
                 className="pointer-events-auto h-full w-full object-contain"
               />
             ) : (
-              <Image
+              <OptimizedImage
                 src={photo.src}
                 alt={photo.title}
                 fill
                 sizes="100vw"
+                priority
                 className="pointer-events-none object-contain select-none"
                 draggable={false}
                 onContextMenu={(e) => e.preventDefault()}
-                priority
               />
             )}
           </div>

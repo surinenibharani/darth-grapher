@@ -1,4 +1,4 @@
-import Image from "next/image";
+import OptimizedImage from "@/components/OptimizedImage";
 import FadeIn from "@/components/FadeIn";
 import { getAboutPortrait, getCollectionCount, getPhotos } from "@/lib/photos";
 
@@ -19,7 +19,7 @@ export default async function AboutPage() {
         <div className="grid gap-16 lg:grid-cols-2 lg:gap-24">
           <FadeIn>
             <div className="relative aspect-[3/4] overflow-hidden">
-              <Image
+              <OptimizedImage
                 src={portrait.src}
                 alt={portrait.title}
                 fill

@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import OptimizedImage from "@/components/OptimizedImage";
 import { useRouter } from "next/navigation";
 import type { Photo } from "@/data/photos";
 import { photoPortfolioPath } from "@/lib/photo-url";
@@ -24,7 +24,7 @@ export default function CollectionsPhotoGrid({
           onClick={() => router.push(photoPortfolioPath(photo.id))}
           className="group relative aspect-square cursor-zoom-in overflow-hidden"
         >
-          <Image
+          <OptimizedImage
             src={photo.src}
             alt={photo.title}
             fill

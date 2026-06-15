@@ -1,4 +1,4 @@
-import Image from "next/image";
+import OptimizedImage from "@/components/OptimizedImage";
 import Link from "next/link";
 import { speciesLabels, type Photo, type Species } from "@/data/photos";
 import { groupBirdPhotos } from "@/lib/bird-groups";
@@ -34,7 +34,7 @@ function SpeciesSection({
       <section id={species}>
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
           <div className="relative aspect-[4/3] overflow-hidden">
-            <Image
+            <OptimizedImage
               src={cover.src}
               alt={cover.title}
               fill

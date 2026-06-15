@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import OptimizedImage from "@/components/OptimizedImage";
 import { motion } from "framer-motion";
 import type { Photo } from "@/data/photos";
 import VideoPlayButton, { isVideoPost } from "@/components/VideoPlayButton";
@@ -40,7 +40,7 @@ export default function PhotoCard({
         onClick={onClick}
         className={`relative block w-full overflow-hidden ${aspectClasses[aspect]} ${onClick ? "cursor-zoom-in" : ""}`}
       >
-        <Image
+        <OptimizedImage
           src={photo.src}
           alt={photo.title}
           fill

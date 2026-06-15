@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image";
+import OptimizedImage from "@/components/OptimizedImage";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
@@ -47,7 +47,7 @@ export default function HomePageClient({
           transition={{ duration: 20, ease: "easeOut" }}
           className="absolute inset-0"
         >
-          <Image
+          <OptimizedImage
             src={hero.src}
             alt={hero.title}
             fill
@@ -152,7 +152,7 @@ export default function HomePageClient({
                   onClick={() => router.push(photoPortfolioPath(photo.id))}
                   className="group relative block aspect-[4/5] w-full cursor-zoom-in overflow-hidden"
                 >
-                  <Image
+                  <OptimizedImage
                     src={photo.src}
                     alt={photo.title}
                     fill
