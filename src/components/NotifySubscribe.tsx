@@ -6,6 +6,11 @@ const STORAGE_KEY = "dg-notify-enabled";
 const LAST_POST_KEY = "dg-last-post-id";
 const POLL_MS = 30 * 60 * 1000;
 
+interface NotifySubscribeProps {
+  /** Server-rendered latest post id — avoids an extra client fetch on page load. */
+  latestPostId?: string | null;
+}
+
 interface LatestPost {
   id: string;
   title: string;
@@ -13,7 +18,9 @@ interface LatestPost {
   thumbnail: string;
 }
 
-export default function NotifySubscribe() {
+export default function NotifySubscribe({
+  latestPostId = null,
+}: NotifySubscribeProps) {
   const [browserEnabled, setBrowserEnabled] = useState(false);
   const [email, setEmail] = useState("");
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
@@ -54,12 +61,16 @@ export default function NotifySubscribe() {
     const enabled = localStorage.getItem(STORAGE_KEY) === "true";
     setBrowserEnabled(enabled);
 
+    if (latestPostId && !localStorage.getItem(LAST_POST_KEY)) {
+      localStorage.setItem(LAST_POST_KEY, latestPostId);
+    }
+
     if (enabled && Notification.permission === "granted") {
       checkForNewPost(true);
       const interval = setInterval(() => checkForNewPost(true), POLL_MS);
       return () => clearInterval(interval);
     }
-  }, [checkForNewPost]);
+  }, [checkForNewPost, latestPostId]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) return;

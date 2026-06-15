@@ -1,4 +1,6 @@
+import { revalidateTag } from "next/cache";
 import { getLatestInstagramPost } from "@/lib/instagram-latest";
+import { INSTAGRAM_CACHE_TAG } from "@/lib/instagram-feed";
 import {
   getSubscriberStore,
   updateLastNotifiedPostId,
@@ -13,6 +15,8 @@ export async function GET(req: Request) {
   if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
+
+  revalidateTag(INSTAGRAM_CACHE_TAG);
 
   const latest = await getLatestInstagramPost();
   if (!latest) {

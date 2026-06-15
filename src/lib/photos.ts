@@ -1,30 +1,19 @@
 import "server-only";
 
-import { unstable_cache } from "next/cache";
+import { cache } from "react";
 import type { Photo, Species } from "@/data/photos";
 import {
   ABOUT_PORTRAIT_SHORTCODE,
   aboutPortrait,
   fallbackPhotos,
 } from "@/data/photos";
-import { fetchInstagramPhotos, isInstagramConfigured } from "@/lib/instagram";
+import {
+  getInstagramFeedPhotos,
+  getInstagramHealth,
+  isInstagramConfigured,
+} from "@/lib/instagram-feed";
 import { checkInstagramHealth } from "@/lib/instagram-health";
 import { selectBirdCloseUps } from "@/lib/photo-selection";
-
-/** Cache Instagram feed for 1 hour — one fetch shared across all pages. */
-const INSTAGRAM_CACHE_SECONDS = 3600;
-
-const getCachedInstagramPhotos = unstable_cache(
-  async () => fetchInstagramPhotos(100),
-  ["instagram-photos"],
-  { revalidate: INSTAGRAM_CACHE_SECONDS, tags: ["instagram"] }
-);
-
-const getCachedInstagramHealth = unstable_cache(
-  async () => checkInstagramHealth(),
-  ["instagram-health"],
-  { revalidate: 300, tags: ["instagram"] }
-);
 
 function sortPhotosByNewest(photos: Photo[]): Photo[] {
   return [...photos].sort((a, b) => {
@@ -46,7 +35,7 @@ async function logInstagramFailure(error: unknown): Promise<void> {
   console.error("[Instagram] Feed fetch failed:", message);
 
   try {
-    const health = await getCachedInstagramHealth();
+    const health = await getInstagramHealth();
     if (!health.ok) {
       console.error("[Instagram] Health check:", health.error);
       if (health.hint) console.error("[Instagram] Fix:", health.hint);
@@ -56,12 +45,12 @@ async function logInstagramFailure(error: unknown): Promise<void> {
   }
 }
 
-export async function getPhotos(): Promise<Photo[]> {
+async function loadPhotos(): Promise<Photo[]> {
   if (!isInstagramConfigured()) {
     return fallbackPhotos;
   }
 
-  const health = await checkInstagramHealth();
+  const health = await getInstagramHealth();
   if (!health.ok) {
     console.error("[Instagram] Health check failed, using fallback photos.");
     if (health.error) console.error("[Instagram] Health check:", health.error);
@@ -70,12 +59,15 @@ export async function getPhotos(): Promise<Photo[]> {
   }
 
   try {
-    return sortPhotosByNewest(await getCachedInstagramPhotos());
+    return sortPhotosByNewest(await getInstagramFeedPhotos());
   } catch (error) {
     await logInstagramFailure(error);
     return fallbackPhotos;
   }
 }
+
+/** Request-memoized photo list — server components only, backed by unstable_cache. */
+export const getPhotos = cache(loadPhotos);
 
 export async function getFeaturedPhotos(): Promise<Photo[]> {
   const photos = await getPhotos();
@@ -145,19 +137,19 @@ export async function getAboutPortrait(): Promise<Photo> {
   return fromFeed ?? aboutPortrait;
 }
 
-export async function isUsingInstagramFeed(): Promise<boolean> {
+export const isUsingInstagramFeed = cache(async (): Promise<boolean> => {
   if (!isInstagramConfigured()) return false;
 
-  const health = await checkInstagramHealth();
+  const health = await getInstagramHealth();
   if (!health.ok) return false;
 
   try {
-    await getCachedInstagramPhotos();
+    await getInstagramFeedPhotos();
     return true;
   } catch {
     return false;
   }
-}
+});
 
 /** Count collections: bird species groups + one per non-bird species with photos. */
 export function getCollectionCount(photos: Photo[]): number {
@@ -203,7 +195,7 @@ export async function getInstagramFeedStatus(): Promise<{
   let feedOk = false;
 
   try {
-    await getCachedInstagramPhotos();
+    await getInstagramFeedPhotos();
     feedOk = true;
   } catch {
     feedOk = false;

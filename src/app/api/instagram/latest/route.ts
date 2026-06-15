@@ -1,6 +1,6 @@
 import { getLatestInstagramPost } from "@/lib/instagram-latest";
 
-export const revalidate = 900;
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const latest = await getLatestInstagramPost();
@@ -13,7 +13,7 @@ export async function GET() {
     { post: latest },
     {
       headers: {
-        "Cache-Control": "public, s-maxage=900, stale-while-revalidate=3600",
+        "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
       },
     }
   );

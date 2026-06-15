@@ -1,10 +1,13 @@
 import Link from "next/link";
 import NotifySubscribe from "@/components/NotifySubscribe";
+import { getLatestInstagramPost } from "@/lib/instagram-latest";
 
-export default function Footer() {
+export default async function Footer() {
+  const latest = await getLatestInstagramPost();
+
   return (
     <footer className="border-t border-white/5 bg-charcoal">
-      <NotifySubscribe />
+      <NotifySubscribe latestPostId={latest?.id ?? null} />
       <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-6 px-6 py-12 md:flex-row lg:px-10">
         <p className="font-display text-2xl tracking-logo">
           <span className="text-forest">DARTH</span>{" "}
