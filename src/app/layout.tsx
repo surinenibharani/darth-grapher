@@ -4,6 +4,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import FeedStatusBanner from "@/components/FeedStatusBanner";
 import MediaProtection from "@/components/MediaProtection";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import "./globals.css";
 
 const cormorant = Cormorant_Garamond({
@@ -38,6 +39,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${outfit.variable}`}>
       <body className="font-sans">
+        <GoogleAnalytics />
         <MediaProtection />
         <Navbar />
         <main>
