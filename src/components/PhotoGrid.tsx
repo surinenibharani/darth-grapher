@@ -12,6 +12,7 @@ interface PhotoGridProps {
   onSelectPhoto?: (photo: Photo) => void;
   onClosePhoto?: () => void;
   onNavigatePhoto?: (direction: "prev" | "next") => void;
+  analyticsSource?: string;
 }
 
 const aspects: Array<"square" | "portrait" | "landscape" | "tall"> = [
@@ -30,6 +31,7 @@ export default function PhotoGrid({
   onSelectPhoto,
   onClosePhoto,
   onNavigatePhoto,
+  analyticsSource = "portfolio",
 }: PhotoGridProps) {
   const [internalPhoto, setInternalPhoto] = useState<Photo | null>(null);
 
@@ -96,6 +98,7 @@ export default function PhotoGrid({
             ? () => handleNavigate("next")
             : undefined
         }
+        analyticsSource={analyticsSource}
       />
     </>
   );

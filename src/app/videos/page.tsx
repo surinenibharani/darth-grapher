@@ -34,7 +34,7 @@ export default async function VideosPage() {
 
         <div className="mt-16">
           {videos.length > 0 ? (
-            <PhotoGrid photos={videos} />
+            <PhotoGrid photos={videos} analyticsSource="videos" />
           ) : (
             <p className="font-sans text-sm text-mist">
               No videos available yet. New Instagram reels and video posts will

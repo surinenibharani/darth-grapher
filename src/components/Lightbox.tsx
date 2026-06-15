@@ -5,6 +5,7 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Photo } from "@/data/photos";
 import PhotoComments from "@/components/PhotoComments";
+import { trackPhotoOpen } from "@/lib/analytics";
 
 interface LightboxProps {
   photo: Photo | null;
@@ -13,6 +14,7 @@ interface LightboxProps {
   photoCount?: number;
   onPrevious?: () => void;
   onNext?: () => void;
+  analyticsSource?: string;
 }
 
 function firstLine(text: string): string {
@@ -110,6 +112,7 @@ export default function Lightbox({
   photoCount,
   onPrevious,
   onNext,
+  analyticsSource = "lightbox",
 }: LightboxProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -118,6 +121,11 @@ export default function Lightbox({
   useEffect(() => {
     setExpanded(false);
   }, [photo?.id]);
+
+  useEffect(() => {
+    if (!photo) return;
+    trackPhotoOpen(photo, analyticsSource, photoIndex);
+  }, [photo, analyticsSource, photoIndex]);
 
   useEffect(() => {
     if (!photo) return;

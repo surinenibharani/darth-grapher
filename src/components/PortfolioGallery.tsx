@@ -54,6 +54,7 @@ export default function PortfolioGallery({
       onSelectPhoto={openPhoto}
       onClosePhoto={closePhoto}
       onNavigatePhoto={navigatePhoto}
+      analyticsSource="portfolio"
     />
   );
 }
