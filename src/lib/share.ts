@@ -18,3 +18,9 @@ export function getFacebookShareUrl(url: string): string {
   const params = new URLSearchParams({ u: url });
   return `https://www.facebook.com/sharer/sharer.php?${params.toString()}`;
 }
+
+/** Opens Messages on iPhone/Mac with a pre-filled iMessage body. */
+export function getIMessageShareUrl(url: string, text: string): string {
+  const body = `${text}\n${url}`;
+  return `sms:&body=${encodeURIComponent(body)}`;
+}

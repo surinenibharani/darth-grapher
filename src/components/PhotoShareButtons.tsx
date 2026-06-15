@@ -3,6 +3,7 @@
 import type { Photo } from "@/data/photos";
 import {
   getFacebookShareUrl,
+  getIMessageShareUrl,
   getPhotoShareUrl,
   getTwitterShareUrl,
 } from "@/lib/share";
@@ -37,6 +38,13 @@ export default function PhotoShareButtons({ photo }: PhotoShareButtonsProps) {
         aria-label={`Share ${photo.title} on Facebook`}
       >
         Facebook
+      </a>
+      <a
+        href={getIMessageShareUrl(shareUrl, shareText)}
+        className="font-sans text-xs uppercase tracking-widest text-gold transition-colors hover:text-ivory"
+        aria-label={`Share ${photo.title} via iMessage`}
+      >
+        iMessage
       </a>
     </div>
   );
