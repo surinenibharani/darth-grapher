@@ -1,4 +1,5 @@
 import { getRecentPostsForFeed } from "@/lib/instagram-latest";
+import { absoluteUrl } from "@/lib/metadata";
 
 export const revalidate = 3600;
 
@@ -18,27 +19,11 @@ function formatRssDate(iso: string): string | null {
   return new Date(parsed).toUTCString();
 }
 
-export async function GET() {
-  const posts = await getRecentPostsForFeed(20);
-  const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://darth-grapher.vercel.app";
-
-  const items = posts
-    .map((post) => {
-      const link = post.permalink || `${siteUrl}/portfolio`;
-      const pubDate = formatRssDate(post.timestamp);
-      return `    <item>
-      <title>${escapeXml(post.title)}</title>
-      <link>${escapeXml(link)}</link>
-      <guid isPermaLink="true">${escapeXml(link)}</guid>
-      <description>${escapeXml(post.description)}</description>
-      ${pubDate ? `<pubDate>${escapeXml(pubDate)}</pubDate>` : ""}
-      ${post.thumbnail ? `<enclosure url="${escapeXml(post.thumbnail)}" type="image/jpeg" />` : ""}
-    </item>`;
-    })
-    .join("\n");
-
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+function buildRssXml(
+  siteUrl: string,
+  items: string
+): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Darth Grapher — Wildlife Photography</title>
@@ -49,11 +34,48 @@ export async function GET() {
 ${items}
   </channel>
 </rss>`;
+}
 
-  return new Response(xml, {
-    headers: {
-      "Content-Type": "application/rss+xml; charset=utf-8",
-      "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
-    },
-  });
+export async function GET() {
+  const siteUrl = absoluteUrl().replace(/\/$/, "");
+
+  try {
+    const posts = await getRecentPostsForFeed(20);
+
+    const items = posts
+      .map((post) => {
+        const link = post.permalink || `${siteUrl}/portfolio`;
+        const pubDate = formatRssDate(post.timestamp);
+        return `    <item>
+      <title>${escapeXml(post.title)}</title>
+      <link>${escapeXml(link)}</link>
+      <guid isPermaLink="true">${escapeXml(link)}</guid>
+      <description>${escapeXml(post.description)}</description>
+      ${pubDate ? `<pubDate>${escapeXml(pubDate)}</pubDate>` : ""}
+      ${post.thumbnail ? `<enclosure url="${escapeXml(post.thumbnail)}" type="image/jpeg" />` : ""}
+    </item>`;
+      })
+      .join("\n");
+
+    const xml = buildRssXml(siteUrl, items);
+
+    return new Response(xml, {
+      headers: {
+        "Content-Type": "application/rss+xml; charset=utf-8",
+        "Cache-Control":
+          "public, s-maxage=3600, stale-while-revalidate=86400",
+      },
+    });
+  } catch (error) {
+    console.error("[RSS] Feed generation failed:", error);
+
+    const xml = buildRssXml(siteUrl, "");
+
+    return new Response(xml, {
+      headers: {
+        "Content-Type": "application/rss+xml; charset=utf-8",
+        "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600",
+      },
+    });
+  }
 }

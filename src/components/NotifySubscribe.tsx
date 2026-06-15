@@ -217,9 +217,7 @@ export default function NotifySubscribe({
               needed.
             </p>
             <a
-              href="/feed.xml"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/feed"
               className="mt-6 inline-block border border-white/10 px-5 py-2.5 font-sans text-xs uppercase tracking-widest text-ivory transition-all hover:border-gold hover:text-gold"
             >
               Subscribe via RSS
