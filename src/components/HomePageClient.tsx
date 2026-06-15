@@ -2,6 +2,7 @@
 
 import OptimizedImage from "@/components/OptimizedImage";
 import Link from "next/link";
+import ContactCTA from "@/components/ContactCTA";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Photo } from "@/data/photos";
@@ -211,6 +212,8 @@ export default function HomePageClient({
           </FadeIn>
         </div>
       </section>
+
+      <ContactCTA />
     </>
   );
 }
