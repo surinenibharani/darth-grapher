@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { getRecentPostsForFeed } from "@/lib/instagram-latest";
 import { absoluteUrl } from "@/lib/metadata";
 
@@ -36,7 +37,15 @@ ${items}
 </rss>`;
 }
 
-export async function GET() {
+export async function GET(req: Request) {
+  const accept = req.headers.get("accept") ?? "";
+  const wantsHtml =
+    accept.includes("text/html") && !accept.includes("application/rss+xml");
+
+  if (wantsHtml) {
+    return NextResponse.redirect(new URL("/feed", req.url));
+  }
+
   const siteUrl = absoluteUrl().replace(/\/$/, "");
 
   try {

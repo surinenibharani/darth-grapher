@@ -43,15 +43,9 @@ export default function FeedSubscribeActions({
           href={feedlyUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="border border-white/10 px-5 py-2.5 font-sans text-xs uppercase tracking-widest text-ivory transition-all hover:border-gold hover:text-gold"
+          className="border border-gold/60 px-5 py-2.5 font-sans text-xs uppercase tracking-widest text-gold transition-all hover:bg-gold hover:text-void"
         >
           Add to Feedly
-        </a>
-        <a
-          href={feedUrl}
-          className="border border-white/10 px-5 py-2.5 font-sans text-xs uppercase tracking-widest text-mist transition-all hover:border-gold hover:text-gold"
-        >
-          View raw feed
         </a>
       </div>
     </div>
