@@ -9,6 +9,10 @@ import PhotoComments from "@/components/PhotoComments";
 interface LightboxProps {
   photo: Photo | null;
   onClose: () => void;
+  photoIndex?: number;
+  photoCount?: number;
+  onPrevious?: () => void;
+  onNext?: () => void;
 }
 
 function firstLine(text: string): string {
@@ -99,7 +103,14 @@ function CaptionPanel({
   );
 }
 
-export default function Lightbox({ photo, onClose }: LightboxProps) {
+export default function Lightbox({
+  photo,
+  onClose,
+  photoIndex,
+  photoCount,
+  onPrevious,
+  onNext,
+}: LightboxProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [expanded, setExpanded] = useState(false);
@@ -130,6 +141,18 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
         return;
       }
 
+      if (event.key === "ArrowLeft" && onPrevious) {
+        event.preventDefault();
+        onPrevious();
+        return;
+      }
+
+      if (event.key === "ArrowRight" && onNext) {
+        event.preventDefault();
+        onNext();
+        return;
+      }
+
       if (event.key !== "Tab") return;
 
       const focusable = getFocusableElements();
@@ -154,7 +177,7 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [photo, onClose]);
+  }, [photo, onClose, onPrevious, onNext]);
 
   function handlePhotoClick() {
     if (expanded) {
@@ -201,6 +224,40 @@ export default function Lightbox({ photo, onClose }: LightboxProps) {
             >
               Close
             </button>
+
+            {onPrevious && (
+              <button
+                type="button"
+                aria-label="Previous photo"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPrevious();
+                }}
+                className="absolute left-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-white/10 bg-void/60 font-sans text-xl text-ivory backdrop-blur-sm transition-colors hover:border-gold hover:text-gold md:left-6"
+              >
+                ‹
+              </button>
+            )}
+
+            {onNext && (
+              <button
+                type="button"
+                aria-label="Next photo"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNext();
+                }}
+                className="absolute right-3 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 items-center justify-center border border-white/10 bg-void/60 font-sans text-xl text-ivory backdrop-blur-sm transition-colors hover:border-gold hover:text-gold md:right-6"
+              >
+                ›
+              </button>
+            )}
+
+            {photoIndex !== undefined && photoCount !== undefined && photoCount > 1 && (
+              <p className="absolute bottom-4 left-1/2 z-20 -translate-x-1/2 font-sans text-[10px] uppercase tracking-widest text-mist/70">
+                {photoIndex + 1} / {photoCount}
+              </p>
+            )}
 
             {photo.videoUrl ? (
               <video

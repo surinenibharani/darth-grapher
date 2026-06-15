@@ -130,6 +130,11 @@ export async function getPhotosBySpecies(species: Species): Promise<Photo[]> {
   return photos.filter((photo) => photo.species === species);
 }
 
+export async function getPhotoById(id: string): Promise<Photo | null> {
+  const photos = await getPhotos();
+  return photos.find((photo) => photo.id === id) ?? null;
+}
+
 /** About page portrait — tree swallow from Instagram post DY2ygCTuPcX. */
 export async function getAboutPortrait(): Promise<Photo> {
   const photos = await getPhotos();

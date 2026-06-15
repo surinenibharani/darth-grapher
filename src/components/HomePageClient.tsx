@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import type { Photo } from "@/data/photos";
 import FadeIn from "@/components/FadeIn";
-import Lightbox from "@/components/Lightbox";
+import { photoPortfolioPath } from "@/lib/photo-url";
 
 interface HomePageClientProps {
   selectedMoments: Photo[];
@@ -19,7 +19,7 @@ export default function HomePageClient({
   heroPhoto,
   usingInstagram,
 }: HomePageClientProps) {
-  const [selectedMoment, setSelectedMoment] = useState<Photo | null>(null);
+  const router = useRouter();
 
   if (!heroPhoto && selectedMoments.length === 0) {
     return (
@@ -149,7 +149,7 @@ export default function HomePageClient({
               <FadeIn key={photo.id} delay={i * 0.1}>
                 <button
                   type="button"
-                  onClick={() => setSelectedMoment(photo)}
+                  onClick={() => router.push(photoPortfolioPath(photo.id))}
                   className="group relative block aspect-[4/5] w-full cursor-zoom-in overflow-hidden"
                 >
                   <Image
@@ -178,11 +178,6 @@ export default function HomePageClient({
           </div>
         </div>
       </section>
-
-      <Lightbox
-        photo={selectedMoment}
-        onClose={() => setSelectedMoment(null)}
-      />
 
       <section className="border-t border-white/5 bg-charcoal py-32">
         <div className="mx-auto max-w-3xl px-6 text-center lg:px-10">
