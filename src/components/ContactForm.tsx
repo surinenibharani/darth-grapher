@@ -1,7 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { motion } from "framer-motion";
+import TurnstileWidget, {
+  isTurnstileConfigured,
+} from "@/components/TurnstileWidget";
 
 interface ContactFormProps {
   variant?: "full" | "compact";
@@ -16,11 +19,24 @@ export default function ContactForm({
     "idle"
   );
   const [errorMessage, setErrorMessage] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [turnstileKey, setTurnstileKey] = useState(0);
+  const captchaRequired = isTurnstileConfigured();
+
+  const handleCaptchaExpire = useCallback(() => {
+    setCaptchaToken("");
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setStatus("loading");
     setErrorMessage("");
+
+    if (captchaRequired && !captchaToken) {
+      setStatus("error");
+      setErrorMessage("Please complete the captcha check.");
+      return;
+    }
 
     const form = e.currentTarget;
     const formData = new FormData(form);
@@ -34,6 +50,7 @@ export default function ContactForm({
           email: formData.get("email"),
           message: formData.get("message"),
           website: formData.get("website"),
+          captchaToken: captchaToken || undefined,
         }),
       });
 
@@ -42,14 +59,19 @@ export default function ContactForm({
       if (!res.ok) {
         setStatus("error");
         setErrorMessage(data.error ?? "Could not send message.");
+        setCaptchaToken("");
+        setTurnstileKey((k) => k + 1);
         return;
       }
 
       setStatus("success");
       form.reset();
+      setCaptchaToken("");
     } catch {
       setStatus("error");
       setErrorMessage("Something went wrong. Please try again.");
+      setCaptchaToken("");
+      setTurnstileKey((k) => k + 1);
     }
   }
 
@@ -132,13 +154,21 @@ export default function ContactForm({
         />
       </div>
 
+      <TurnstileWidget
+        key={turnstileKey}
+        onToken={setCaptchaToken}
+        onExpire={handleCaptchaExpire}
+      />
+
       {errorMessage && (
         <p className="font-sans text-xs text-mist">{errorMessage}</p>
       )}
 
       <button
         type="submit"
-        disabled={status === "loading"}
+        disabled={
+          status === "loading" || (captchaRequired && !captchaToken)
+        }
         className={`w-full border border-gold/60 py-3 font-sans text-xs uppercase tracking-widest text-gold transition-all hover:bg-gold hover:text-void disabled:opacity-50 ${
           isCompact ? "" : "py-4"
         }`}
