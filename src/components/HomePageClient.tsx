@@ -9,6 +9,8 @@ import type { Photo } from "@/data/photos";
 import FadeIn from "@/components/FadeIn";
 import { photoPortfolioPath } from "@/lib/photo-url";
 
+const instagramProfileUrl = "https://www.instagram.com/darthgrapher/";
+
 interface HomePageClientProps {
   selectedMoments: Photo[];
   heroPhoto: Photo | null;
@@ -87,7 +89,16 @@ export default function HomePageClient({
               transition={{ delay: 1, duration: 0.8 }}
               className="mt-4 font-sans text-xs uppercase tracking-widest text-mist"
             >
-              Live from @darthgrapher on Instagram
+              Live from{" "}
+              <a
+                href={instagramProfileUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gold transition-colors hover:text-ivory"
+              >
+                @darthgrapher
+              </a>{" "}
+              on Instagram
             </motion.p>
           )}
           <motion.div
