@@ -156,6 +156,7 @@ export default function ContactForm({
 
       <TurnstileWidget
         key={turnstileKey}
+        action="contact"
         onToken={setCaptchaToken}
         onExpire={handleCaptchaExpire}
       />

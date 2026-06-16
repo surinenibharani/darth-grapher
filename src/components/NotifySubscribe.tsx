@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import TurnstileWidget, {
+  isTurnstileConfigured,
+} from "@/components/TurnstileWidget";
 
 const STORAGE_KEY = "dg-notify-enabled";
 const LAST_POST_KEY = "dg-last-post-id";
@@ -26,6 +29,13 @@ export default function NotifySubscribe({
   const [emailStatus, setEmailStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
   const [emailMessage, setEmailMessage] = useState("");
   const [browserStatus, setBrowserStatus] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [turnstileKey, setTurnstileKey] = useState(0);
+  const captchaRequired = isTurnstileConfigured();
+
+  const handleCaptchaExpire = useCallback(() => {
+    setCaptchaToken("");
+  }, []);
 
   const checkForNewPost = useCallback(async (showNotification: boolean) => {
     try {
@@ -109,26 +119,37 @@ export default function NotifySubscribe({
     setEmailStatus("loading");
     setEmailMessage("");
 
+    if (captchaRequired && !captchaToken) {
+      setEmailStatus("error");
+      setEmailMessage("Please complete the security check.");
+      return;
+    }
+
     try {
       const res = await fetch("/api/notifications/subscribe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, captchaToken: captchaToken || undefined }),
       });
       const data = await res.json();
 
       if (!res.ok) {
         setEmailStatus("error");
         setEmailMessage(data.error ?? "Could not subscribe.");
+        setCaptchaToken("");
+        setTurnstileKey((k) => k + 1);
         return;
       }
 
       setEmailStatus("ok");
       setEmailMessage(data.message);
       setEmail("");
+      setCaptchaToken("");
     } catch {
       setEmailStatus("error");
       setEmailMessage("Something went wrong. Try again later.");
+      setCaptchaToken("");
+      setTurnstileKey((k) => k + 1);
     }
   }
 
@@ -184,6 +205,14 @@ export default function NotifySubscribe({
             </p>
             <form onSubmit={subscribeEmail} className="mt-6 space-y-3">
               <input
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                className="pointer-events-none absolute h-0 w-0 opacity-0"
+                aria-hidden
+              />
+              <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -191,9 +220,18 @@ export default function NotifySubscribe({
                 required
                 className="w-full border-b border-white/10 bg-transparent py-2 font-sans text-sm text-ivory outline-none transition-colors focus:border-gold"
               />
+              <TurnstileWidget
+                key={turnstileKey}
+                action="subscribe"
+                onToken={setCaptchaToken}
+                onExpire={handleCaptchaExpire}
+              />
               <button
                 type="submit"
-                disabled={emailStatus === "loading"}
+                disabled={
+                  emailStatus === "loading" ||
+                  (captchaRequired && !captchaToken)
+                }
                 className="border border-gold/60 px-5 py-2.5 font-sans text-xs uppercase tracking-widest text-gold transition-all hover:bg-gold hover:text-void disabled:opacity-50"
               >
                 {emailStatus === "loading" ? "Subscribing…" : "Subscribe"}

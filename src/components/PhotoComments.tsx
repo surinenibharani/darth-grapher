@@ -1,6 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import TurnstileWidget, {
+  isTurnstileConfigured,
+} from "@/components/TurnstileWidget";
 
 interface PhotoComment {
   id: string;
@@ -30,12 +33,23 @@ export default function PhotoComments({ photoId }: PhotoCommentsProps) {
   const [enabled, setEnabled] = useState(true);
   const [name, setName] = useState("");
   const [text, setText] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "ok" | "error">(
+    "idle"
+  );
   const [message, setMessage] = useState("");
+  const [captchaToken, setCaptchaToken] = useState("");
+  const [turnstileKey, setTurnstileKey] = useState(0);
+  const captchaRequired = isTurnstileConfigured();
+
+  const handleCaptchaExpire = useCallback(() => {
+    setCaptchaToken("");
+  }, []);
 
   const loadComments = useCallback(async () => {
     try {
-      const res = await fetch(`/api/photos/${encodeURIComponent(photoId)}/comments`);
+      const res = await fetch(
+        `/api/photos/${encodeURIComponent(photoId)}/comments`
+      );
       const data = await res.json();
       setComments(data.comments ?? []);
       setEnabled(data.enabled !== false);
@@ -53,20 +67,37 @@ export default function PhotoComments({ photoId }: PhotoCommentsProps) {
     setStatus("loading");
     setMessage("");
 
+    if (captchaRequired && !captchaToken) {
+      setStatus("error");
+      setMessage("Please complete the security check.");
+      return;
+    }
+
     const form = e.currentTarget;
-    const website = (form.elements.namedItem("website") as HTMLInputElement)?.value;
+    const website = (form.elements.namedItem("website") as HTMLInputElement)
+      ?.value;
 
     try {
-      const res = await fetch(`/api/photos/${encodeURIComponent(photoId)}/comments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, text, website }),
-      });
+      const res = await fetch(
+        `/api/photos/${encodeURIComponent(photoId)}/comments`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            text,
+            website,
+            captchaToken: captchaToken || undefined,
+          }),
+        }
+      );
       const data = await res.json();
 
       if (!res.ok) {
         setStatus("error");
         setMessage(data.error ?? "Could not post comment.");
+        setCaptchaToken("");
+        setTurnstileKey((k) => k + 1);
         return;
       }
 
@@ -75,11 +106,14 @@ export default function PhotoComments({ photoId }: PhotoCommentsProps) {
       }
       setName("");
       setText("");
+      setCaptchaToken("");
       setStatus("ok");
       setMessage("Comment posted.");
     } catch {
       setStatus("error");
       setMessage("Something went wrong. Try again later.");
+      setCaptchaToken("");
+      setTurnstileKey((k) => k + 1);
     }
   }
 
@@ -137,9 +171,17 @@ export default function PhotoComments({ photoId }: PhotoCommentsProps) {
             maxLength={500}
             className="w-full resize-none border-b border-white/10 bg-transparent py-2 font-sans text-sm text-ivory outline-none transition-colors focus:border-gold"
           />
+          <TurnstileWidget
+            key={turnstileKey}
+            action="comment"
+            onToken={setCaptchaToken}
+            onExpire={handleCaptchaExpire}
+          />
           <button
             type="submit"
-            disabled={status === "loading"}
+            disabled={
+              status === "loading" || (captchaRequired && !captchaToken)
+            }
             className="border border-gold/60 px-4 py-2 font-sans text-xs uppercase tracking-widest text-gold transition-all hover:bg-gold hover:text-void disabled:opacity-50"
           >
             {status === "loading" ? "Posting…" : "Post Comment"}

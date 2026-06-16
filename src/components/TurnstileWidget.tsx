@@ -2,12 +2,14 @@
 
 import Script from "next/script";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { CaptchaAction } from "@/lib/captcha-types";
 
 const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
 interface TurnstileWidgetProps {
   onToken: (token: string) => void;
   onExpire: () => void;
+  action?: CaptchaAction;
 }
 
 declare global {
@@ -21,6 +23,8 @@ declare global {
           "expired-callback"?: () => void;
           "error-callback"?: () => void;
           theme?: "light" | "dark" | "auto";
+          action?: string;
+          appearance?: "always" | "execute" | "interaction-only";
         }
       ) => string;
       reset: (widgetId: string) => void;
@@ -31,6 +35,7 @@ declare global {
 export default function TurnstileWidget({
   onToken,
   onExpire,
+  action = "contact",
 }: TurnstileWidgetProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const widgetIdRef = useRef<string | null>(null);
@@ -43,11 +48,13 @@ export default function TurnstileWidget({
     widgetIdRef.current = window.turnstile.render(containerRef.current, {
       sitekey: siteKey,
       theme: "dark",
+      action,
+      appearance: "interaction-only",
       callback: onToken,
       "expired-callback": onExpire,
       "error-callback": onExpire,
     });
-  }, [onExpire, onToken]);
+  }, [action, onExpire, onToken]);
 
   useEffect(() => {
     if (scriptReady) renderWidget();
@@ -62,7 +69,7 @@ export default function TurnstileWidget({
         strategy="lazyOnload"
         onLoad={() => setScriptReady(true)}
       />
-      <div ref={containerRef} className="min-h-[65px]" />
+      <div ref={containerRef} className="min-h-[65px]" aria-label="Security check" />
     </>
   );
 }

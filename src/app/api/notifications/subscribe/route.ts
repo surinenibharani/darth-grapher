@@ -1,16 +1,22 @@
 import { addEmailSubscriber, isEmailSubscribeEnabled } from "@/lib/notification-store";
+import { enforceCaptcha } from "@/lib/require-captcha";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: Request) {
-  let body: { email?: string };
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const email = body.email?.trim().toLowerCase();
+  const captchaError = await enforceCaptcha(req, body, "subscribe");
+  if (captchaError) return captchaError;
+
+  const email =
+    typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
+
   if (!email || !EMAIL_RE.test(email)) {
     return Response.json({ error: "Valid email required" }, { status: 400 });
   }

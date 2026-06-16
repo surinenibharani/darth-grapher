@@ -3,6 +3,7 @@ import {
   getCommentsForPhoto,
   isCommentsStorageConfigured,
 } from "@/lib/comments-store";
+import { enforceCaptcha } from "@/lib/require-captcha";
 
 interface RouteContext {
   params: Promise<{ id: string }>;
@@ -29,19 +30,18 @@ export async function POST(req: Request, context: RouteContext) {
   const { id } = await context.params;
   const photoId = decodeURIComponent(id);
 
-  let body: { name?: string; text?: string; website?: string };
+  let body: Record<string, unknown>;
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  if (body.website) {
-    return Response.json({ ok: true, comment: null });
-  }
+  const captchaError = await enforceCaptcha(req, body, "comment");
+  if (captchaError) return captchaError;
 
-  const name = body.name?.trim().slice(0, 80) ?? "";
-  const text = body.text?.trim().slice(0, 500) ?? "";
+  const name = typeof body.name === "string" ? body.name.trim().slice(0, 80) : "";
+  const text = typeof body.text === "string" ? body.text.trim().slice(0, 500) : "";
 
   if (!name || name.length < 2) {
     return Response.json({ error: "Please enter your name." }, { status: 400 });

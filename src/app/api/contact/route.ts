@@ -1,6 +1,6 @@
 import { sendContactEmail } from "@/lib/contact-mail";
 import { validateContactPayload } from "@/lib/contact";
-import { isTurnstileEnabled, verifyTurnstileToken } from "@/lib/turnstile";
+import { enforceCaptcha } from "@/lib/require-captcha";
 
 export async function POST(req: Request) {
   let body: unknown;
@@ -10,30 +10,13 @@ export async function POST(req: Request) {
     return Response.json({ error: "Invalid request." }, { status: 400 });
   }
 
-  if (isTurnstileEnabled()) {
-    const raw = body as Record<string, unknown>;
-    const captchaToken =
-      typeof raw.captchaToken === "string" ? raw.captchaToken.trim() : "";
+  const raw = (body && typeof body === "object" ? body : {}) as Record<
+    string,
+    unknown
+  >;
 
-    if (!captchaToken) {
-      return Response.json(
-        { error: "Please complete the captcha check." },
-        { status: 400 }
-      );
-    }
-
-    const ip =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-      req.headers.get("x-real-ip");
-
-    const valid = await verifyTurnstileToken(captchaToken, ip);
-    if (!valid) {
-      return Response.json(
-        { error: "Captcha verification failed. Please try again." },
-        { status: 400 }
-      );
-    }
-  }
+  const captchaError = await enforceCaptcha(req, raw, "contact");
+  if (captchaError) return captchaError;
 
   const validation = validateContactPayload(body);
   if (!validation.ok || !validation.data) {
