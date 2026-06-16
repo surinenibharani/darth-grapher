@@ -59,9 +59,14 @@ function writeLocalStore(store: CommentStore): void {
   writeFileSync(LOCAL_PATH, JSON.stringify(store, null, 2), "utf8");
 }
 
+/** Local file store works off Vercel; serverless production needs Blob. */
+function canUseLocalFileStore(): boolean {
+  return !process.env.VERCEL;
+}
+
 async function readStore(): Promise<CommentStore> {
   if (isBlobConfigured()) return readBlobStore();
-  if (process.env.NODE_ENV === "development") return readLocalStore();
+  if (canUseLocalFileStore()) return readLocalStore();
   return emptyStore();
 }
 
@@ -70,7 +75,7 @@ async function writeStore(store: CommentStore): Promise<boolean> {
     await writeBlobStore(store);
     return true;
   }
-  if (process.env.NODE_ENV === "development") {
+  if (canUseLocalFileStore()) {
     writeLocalStore(store);
     return true;
   }
@@ -78,7 +83,7 @@ async function writeStore(store: CommentStore): Promise<boolean> {
 }
 
 export function isCommentsStorageConfigured(): boolean {
-  return isBlobConfigured() || process.env.NODE_ENV === "development";
+  return isBlobConfigured() || canUseLocalFileStore();
 }
 
 export async function getCommentsForPhoto(photoId: string): Promise<PhotoComment[]> {

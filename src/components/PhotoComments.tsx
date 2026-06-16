@@ -196,7 +196,7 @@ export default function PhotoComments({ photoId }: PhotoCommentsProps) {
         </form>
       ) : (
         <p className="mt-4 font-sans text-xs text-mist/60">
-          Comments are not available in this environment.
+          Comments are not available right now.
         </p>
       )}
     </div>
