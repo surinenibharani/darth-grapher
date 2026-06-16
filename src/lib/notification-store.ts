@@ -11,6 +11,13 @@ function emptyStore(): SubscriberStore {
   return { emails: [], lastNotifiedPostId: null };
 }
 
+export function isEmailSubscribeEnabled(): boolean {
+  return Boolean(
+    process.env.BLOB_READ_WRITE_TOKEN ||
+      (process.env.RESEND_API_KEY && process.env.RESEND_AUDIENCE_ID)
+  );
+}
+
 async function readStore(): Promise<SubscriberStore> {
   if (!process.env.BLOB_READ_WRITE_TOKEN) return emptyStore();
 
@@ -35,47 +42,83 @@ async function writeStore(store: SubscriberStore): Promise<void> {
   });
 }
 
+async function fetchResendAudienceEmails(): Promise<string[]> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  if (!apiKey || !audienceId) return [];
+
+  try {
+    const res = await fetch(
+      `https://api.resend.com/audiences/${audienceId}/contacts`,
+      { headers: { Authorization: `Bearer ${apiKey}` } }
+    );
+    if (!res.ok) {
+      console.error("[Notify] Resend list contacts error:", await res.text());
+      return [];
+    }
+    const data = (await res.json()) as { data?: Array<{ email?: string }> };
+    return (data.data ?? [])
+      .map((contact) => contact.email?.trim().toLowerCase())
+      .filter((email): email is string => Boolean(email));
+  } catch (error) {
+    console.error("[Notify] Resend list contacts failed:", error);
+    return [];
+  }
+}
+
+async function addToResendAudience(email: string): Promise<boolean> {
+  const apiKey = process.env.RESEND_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID;
+  if (!apiKey || !audienceId) return false;
+
+  const res = await fetch(
+    `https://api.resend.com/audiences/${audienceId}/contacts`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, unsubscribed: false }),
+    }
+  );
+
+  if (res.ok || res.status === 409) return true;
+
+  console.error("[Notify] Resend contact error:", await res.text());
+  return false;
+}
+
 export async function addEmailSubscriber(email: string): Promise<boolean> {
+  if (!isEmailSubscribeEnabled()) return false;
+
   const normalized = email.trim().toLowerCase();
   if (!normalized) return false;
 
-  const hasResend = Boolean(
-    process.env.RESEND_API_KEY && process.env.RESEND_AUDIENCE_ID
-  );
-  const hasBlob = Boolean(process.env.BLOB_READ_WRITE_TOKEN);
+  let saved = false;
 
-  if (!hasResend && !hasBlob) return false;
-
-  if (hasResend) {
-    const res = await fetch(
-      `https://api.resend.com/audiences/${process.env.RESEND_AUDIENCE_ID}/contacts`,
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          email: normalized,
-          unsubscribed: false,
-        }),
-      }
-    );
-    if (!res.ok && res.status !== 409) {
-      console.error("[Notify] Resend contact error:", await res.text());
-      if (!hasBlob) return false;
-    }
-  }
-
-  if (hasBlob) {
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
     const store = await readStore();
     if (!store.emails.includes(normalized)) {
       store.emails.push(normalized);
       await writeStore(store);
     }
+    saved = true;
   }
 
-  return true;
+  if (process.env.RESEND_API_KEY && process.env.RESEND_AUDIENCE_ID) {
+    const resendOk = await addToResendAudience(normalized);
+    saved = saved || resendOk;
+  }
+
+  return saved;
+}
+
+/** All subscriber emails from Blob and/or Resend audience. */
+export async function getSubscriberEmails(): Promise<string[]> {
+  const store = await readStore();
+  const resendEmails = await fetchResendAudienceEmails();
+  return Array.from(new Set([...store.emails, ...resendEmails]));
 }
 
 export async function getSubscriberStore(): Promise<SubscriberStore> {

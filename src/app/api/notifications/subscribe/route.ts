@@ -1,4 +1,4 @@
-import { addEmailSubscriber } from "@/lib/notification-store";
+import { addEmailSubscriber, isEmailSubscribeEnabled } from "@/lib/notification-store";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -15,15 +15,22 @@ export async function POST(req: Request) {
     return Response.json({ error: "Valid email required" }, { status: 400 });
   }
 
+  if (!isEmailSubscribeEnabled()) {
+    return Response.json(
+      {
+        error:
+          "Email signup is not enabled on the server yet. Try browser notifications or RSS, or check back soon.",
+      },
+      { status: 503 }
+    );
+  }
+
   const stored = await addEmailSubscriber(email);
 
   if (!stored) {
     return Response.json(
-      {
-        error:
-          "Email notifications are not configured yet. Use browser notifications or RSS instead.",
-      },
-      { status: 503 }
+      { error: "Could not save your subscription. Please try again." },
+      { status: 500 }
     );
   }
 

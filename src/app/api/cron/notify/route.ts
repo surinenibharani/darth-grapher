@@ -2,6 +2,7 @@ import { revalidateTag } from "next/cache";
 import { getLatestInstagramPost } from "@/lib/instagram-latest";
 import { INSTAGRAM_CACHE_TAG } from "@/lib/instagram-feed";
 import {
+  getSubscriberEmails,
   getSubscriberStore,
   updateLastNotifiedPostId,
 } from "@/lib/notification-store";
@@ -28,13 +29,14 @@ export async function GET(req: Request) {
     return Response.json({ ok: true, message: "No new posts" });
   }
 
+  const subscribers = await getSubscriberEmails();
   const siteUrl =
     process.env.NEXT_PUBLIC_SITE_URL ?? "https://darth-grapher.vercel.app";
 
   if (
     process.env.RESEND_API_KEY &&
     process.env.RESEND_FROM_EMAIL &&
-    store.emails.length > 0
+    subscribers.length > 0
   ) {
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -42,7 +44,7 @@ export async function GET(req: Request) {
     await resend.emails.send({
       from: process.env.RESEND_FROM_EMAIL,
       to: process.env.RESEND_FROM_EMAIL,
-      bcc: store.emails,
+      bcc: subscribers,
       subject: `New post from Darth Grapher: ${latest.title}`,
       html: `
         <p>A new wildlife photo is live on @darthgrapher.</p>
@@ -60,6 +62,6 @@ export async function GET(req: Request) {
     ok: true,
     message: "Checked for new posts",
     postId: latest.id,
-    notified: store.emails.length,
+    notified: subscribers.length,
   });
 }
